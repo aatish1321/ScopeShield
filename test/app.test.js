@@ -2,9 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { readFile } from 'node:fs/promises';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { request as httpRequest } from 'node:http';
 import { createApp } from '../src/server.js';
 import { loadConfig } from '../src/validation.js';
+import { openStore } from '../src/store.js';
 
 const ownerKey = 'synthetic-owner-test-key-at-least-32-characters';
 const input = { agreement: 'Build three pages.', newRequest: 'Add a store.' };
@@ -17,12 +21,13 @@ const reply = () => new Response(JSON.stringify({ choices: [{ finish_reason: 'st
 async function start(t, options = {}) {
   const config = loadConfig({ GROQ_API_KEY: 'server-private-test-key', OWNER_ACCESS_KEY: ownerKey,
     APP_URL: options.secure ? 'https://127.0.0.1' : 'http://127.0.0.1' });
-  const server = createApp(config, { fetchApi: options.fetchApi || (async () => reply()), now: options.now || Date.now }).listen(0, '127.0.0.1');
+  const store = options.store || openStore(':memory:');
+  const server = createApp(config, { store, fetchApi: options.fetchApi || (async () => reply()), now: options.now || Date.now }).listen(0, '127.0.0.1');
   await once(server, 'listening');
   config.appUrl.port = String(server.address().port);
   t.after(() => new Promise((resolve, reject) => {
     server.closeAllConnections();
-    server.close(error => error ? reject(error) : resolve());
+    server.close(error => { store.close(); error ? reject(error) : resolve(); });
   }));
   const base = `http://127.0.0.1:${server.address().port}`;
   const request = (path, body, { cookie, headers = {}, ...rest } = {}) => fetch(base + path, {
@@ -173,12 +178,66 @@ test('server restart invalidates sessions', async t => {
   assert.equal((await second.request('/api/session', undefined, { cookie })).status, 401);
 });
 
+test('only owner can publish/list; client sees immutable approved fields', async t => {
+  const { request, login } = await start(t);
+  const terms = { title: '<script>Store</script>', work: 'Add a store', delivery: 'Five extra days', amount: '250.00', reviewed: true,
+    agreement: 'private agreement text', analysis: 'internal reasoning', amountCents: 1, currency: 'EUR' };
+  assert.equal((await request('/api/proposals')).status, 401);
+  assert.equal((await request('/api/proposals', terms)).status, 401);
+  const cookie = await login();
+  assert.equal((await request('/api/proposals', { ...terms, reviewed: false }, { cookie })).status, 400);
+  const published = await request('/api/proposals', terms, { cookie });
+  assert.equal(published.status, 201);
+  const proposal = await published.json();
+  assert.equal(proposal.amountCents, 25000);
+  assert.equal(proposal.currency, 'USD');
+  assert.match(proposal.token, /^[a-f0-9]{64}$/);
+  const client = await request(`/api/proposals/${proposal.token}`);
+  assert.equal(client.status, 200);
+  const publicView = await client.json();
+  assert.equal(publicView.work, terms.work);
+  assert.equal(publicView.title, terms.title);
+  assert.equal(publicView.status, 'unpaid');
+  for (const field of ['id', 'token', 'agreement', 'analysis', 'owner_key', 'order_id', 'create_request_id']) assert.ok(!Object.hasOwn(publicView, field));
+  assert.equal((await request(`/p/${proposal.token}`)).status, 200);
+  assert.equal((await request(`/api/proposals/${proposal.token}`, { amount: '1.00' }, { method: 'PATCH', cookie })).status, 404);
+  assert.equal((await (await request(`/api/proposals/${proposal.token}`)).json()).amountCents, 25000);
+  assert.equal((await (await request('/api/proposals', undefined, { cookie })).json()).length, 1);
+  for (const invalid of ['bad', 'a'.repeat(64)]) {
+    assert.equal((await request(`/api/proposals/${invalid}`)).status, 404);
+    assert.equal((await request(`/p/${invalid}`)).status, 404);
+  }
+});
+
+test('published client link survives app/store reopen and owner logout', async t => {
+  const directory = mkdtempSync(join(tmpdir(), 'scopeshield-api-'));
+  const path = join(directory, 'proposals.sqlite');
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  let token;
+  await t.test('publish', async t => {
+    const { request, login } = await start(t, { store: openStore(path) });
+    const cookie = await login();
+    const response = await request('/api/proposals', { reviewed: true, title: 'Store', work: 'Ten products', amount: '250', delivery: 'Five days' }, { cookie });
+    assert.equal(response.status, 201);
+    token = (await response.json()).token;
+    await request('/api/logout', {}, { cookie });
+    assert.equal((await request(`/api/proposals/${token}`)).status, 200);
+  });
+  await t.test('reopen', async t => {
+    const { request } = await start(t, { store: openStore(path) });
+    const response = await request(`/api/proposals/${token}`);
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).amountCents, 25000);
+  });
+});
+
 test('browser code uses safe text sinks and no persistent credential/data storage', async () => {
-  const source = await readFile(new URL('../public/owner.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(source, /localStorage|sessionStorage|innerHTML|outerHTML|insertAdjacentHTML|document\.write/);
-  assert.doesNotMatch(source, /GROQ_API_KEY|PAYPAL_CLIENT_SECRET|OWNER_ACCESS_KEY/);
-  assert.match(source, /node\.textContent = text/);
-  const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
-  const requiredIds = [...source.matchAll(/\$\('([^']+)'\)/g)].map(match => match[1]);
-  for (const id of requiredIds) assert.ok(html.includes(`id="${id}"`), `Missing UI element: ${id}`);
+  for (const [script, page] of [['owner.js', 'index.html'], ['proposal.js', 'proposal.html']]) {
+    const source = await readFile(new URL(`../public/${script}`, import.meta.url), 'utf8');
+    assert.doesNotMatch(source, /localStorage|sessionStorage|innerHTML|outerHTML|insertAdjacentHTML|document\.write/);
+    assert.doesNotMatch(source, /GROQ_API_KEY|PAYPAL_CLIENT_SECRET|OWNER_ACCESS_KEY/);
+    const html = await readFile(new URL(`../public/${page}`, import.meta.url), 'utf8');
+    const requiredIds = [...source.matchAll(/\$\('([^']+)'\)/g)].map(match => match[1]);
+    for (const id of requiredIds) assert.ok(html.includes(`id="${id}"`), `Missing UI element: ${id}`);
+  }
 });

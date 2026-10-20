@@ -22,4 +22,8 @@ small, .notice { color: #465260; }
 .item p, #summary { white-space: pre-wrap; overflow-wrap: anywhere; }
 blockquote { margin: 8px 0; padding-left: 16px; border-left: 3px solid #9aabbc; white-space: pre-wrap; overflow-wrap: anywhere; }
 [hidden] { display: none !important; }
+.check { display: flex; gap: 10px; align-items: baseline; }
+.check input { width: auto; }
+a { color: #184b74; overflow-wrap: anywhere; }
+.proposal-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 480px) { section { padding: 16px; } main { padding: 20px 12px; } }

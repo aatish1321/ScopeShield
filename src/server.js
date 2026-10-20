@@ -3,13 +3,14 @@ import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { compareRequest } from './analysis.js';
-import { AppError, loadConfig } from './validation.js';
+import { AppError, loadConfig, validateProposal } from './validation.js';
+import { openStore, publicProposal, validToken } from './store.js';
 
 const publicDirectory = fileURLToPath(new URL('../public/', import.meta.url));
 const sessionDuration = 8 * 60 * 60 * 1000;
 const hash = value => createHash('sha256').update(value).digest();
 
-export function createApp(config, { fetchApi = fetch, now = Date.now } = {}) {
+export function createApp(config, { fetchApi = fetch, now = Date.now, store = openStore() } = {}) {
   const app = express();
   const sessions = new Map();
   const limits = new Map();
@@ -97,6 +98,25 @@ export function createApp(config, { fetchApi = fetch, now = Date.now } = {}) {
     res.json(result);
   });
 
+  app.get('/api/proposals', requireOwner, (req, res) => {
+    res.json(store.list().map(row => ({ ...publicProposal(row), token: row.token })));
+  });
+  app.post('/api/proposals', requireOwner, throttle('publish', 30, 60 * 60 * 1000), (req, res) => {
+    const row = store.create(validateProposal(req.body));
+    res.status(201).json({ ...publicProposal(row), token: row.token });
+  });
+  app.get('/api/proposals/:token', (req, res) => {
+    const row = store.get(req.params.token);
+    if (!row) throw new AppError(404, 'Proposal unavailable. Check the link with your freelancer.');
+    res.json(publicProposal(row));
+  });
+  app.get('/p/:token', (req, res) => {
+    if (!validToken(req.params.token) || !store.get(req.params.token)) {
+      return res.status(404).sendFile('proposal.html', { root: publicDirectory });
+    }
+    res.sendFile('proposal.html', { root: publicDirectory });
+  });
+
   app.use(express.static(publicDirectory, { dotfiles: 'deny', index: 'index.html', etag: false, cacheControl: false }));
   app.use((req, res, next) => next(new AppError(404, 'Page or endpoint not found.')));
   app.use((error, req, res, next) => {
@@ -115,12 +135,15 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   try {
     process.umask(0o077);
     const config = loadConfig();
-    createApp(config).listen(config.port, '127.0.0.1', () => {
+    const store = openStore();
+    const server = createApp(config, { store }).listen(config.port, '127.0.0.1', () => {
       console.log(`ScopeShield running at ${config.appUrl.origin}`);
     }).on('error', () => {
+      store.close();
       console.error('Could not start ScopeShield. Check whether PORT is already in use.');
       process.exitCode = 1;
     });
+    for (const signal of ['SIGTERM', 'SIGINT']) process.once(signal, () => server.close(() => store.close()));
   } catch (error) {
     console.error(error.message);
     process.exitCode = 1;

@@ -12,6 +12,26 @@ export function requiredText(value, label, maxLength = 20000) {
   return value.trim();
 }
 
+export function parseAmount(value) {
+  if (typeof value !== 'string' || !/^(?:0|[1-9]\d{0,5})(?:\.\d{1,2})?$/.test(value.trim())) {
+    throw new AppError(400, 'Price must be USD 0.01–999,999.99 with at most two decimal places.');
+  }
+  const [whole, fraction = ''] = value.trim().split('.');
+  const cents = Number(whole) * 100 + Number(fraction.padEnd(2, '0'));
+  if (cents < 1) throw new AppError(400, 'Price must be greater than zero.');
+  return cents;
+}
+
+export function validateProposal(body) {
+  if (body?.reviewed !== true) throw new AppError(400, 'Review and approve the proposal before publishing.');
+  return {
+    title: requiredText(body.title, 'Proposal title', 160),
+    work: requiredText(body.work, 'Additional work', 10000),
+    delivery: requiredText(body.delivery, 'Delivery change', 1000),
+    amountCents: parseAmount(body.amount),
+  };
+}
+
 export function loadConfig(env = process.env) {
   if (!env.GROQ_API_KEY?.trim()) throw new Error('Set GROQ_API_KEY in your local .env.');
   if (!env.OWNER_ACCESS_KEY || env.OWNER_ACCESS_KEY.trim().length < 32 || env.OWNER_ACCESS_KEY.length > 512) {

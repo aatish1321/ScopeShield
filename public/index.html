@@ -55,8 +55,15 @@
           <small id="amount-help">Enter your price in US dollars. No currency conversion.</small>
           <label for="delivery">Delivery change</label>
           <textarea id="delivery" rows="2" maxlength="1000" placeholder="For example, three additional working days." required></textarea>
-          <p class="notice">Draft only. Publishing and payment are not available yet.</p>
+          <label class="check"><input id="reviewed" type="checkbox" required> I have reviewed the work, price, and delivery change and approve these terms.</label>
+          <p class="notice">Published terms are fixed. Anyone with the client link can view them. Correct mistakes by publishing a new proposal.</p>
+          <button id="publish" type="submit">Approve and publish proposal</button>
         </form>
+      </section>
+      <section aria-labelledby="published-title">
+        <h2 id="published-title">Published proposals</h2>
+        <button id="refresh-proposals" type="button">Refresh proposals</button>
+        <div id="proposals"></div>
       </section>
       <p class="notice">Unsaved agreement text, analysis, and draft edits are held in this page’s memory only. Reloading or logging out clears them.</p>
     </div>

@@ -29,6 +29,9 @@ function setSignedIn(value) {
     $('analysis-form').reset();
     $('draft-form').reset();
     clearComparison();
+    $('proposals').replaceChildren();
+  } else {
+    refreshProposals().catch(error => { $('status').textContent = error.message; });
   }
 }
 
@@ -152,7 +155,66 @@ $('analysis-form').addEventListener('submit', async event => {
   }
 });
 
-$('draft-form').addEventListener('submit', event => event.preventDefault());
+const usd = cents => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
+
+async function refreshProposals() {
+  const proposals = await api('/api/proposals');
+  if (!signedIn) return;
+  $('proposals').replaceChildren();
+  if (!proposals.length) addText($('proposals'), 'p', 'No published proposals yet.');
+  for (const proposal of proposals) {
+    const card = document.createElement('article');
+    card.className = 'item';
+    addText(card, 'h3', proposal.title);
+    addText(card, 'p', `${usd(proposal.amountCents)} USD · ${proposal.status}`);
+    const link = document.createElement('a');
+    link.href = `/p/${proposal.token}`;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = new URL(link.href).href;
+    card.append(link);
+    const copy = document.createElement('button');
+    copy.type = 'button';
+    copy.textContent = 'Copy client link';
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(link.href);
+        $('status').textContent = 'Client link copied. Anyone with this link can view the proposal.';
+      } catch {
+        $('status').textContent = 'Could not copy automatically. Copy the displayed link manually.';
+      }
+    });
+    card.append(document.createElement('br'), copy);
+    $('proposals').append(card);
+  }
+}
+
+$('refresh-proposals').addEventListener('click', () => {
+  refreshProposals().catch(error => { $('status').textContent = error.message; });
+});
+
+$('draft-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  $('publish').disabled = true;
+  try {
+    const proposal = await api('/api/proposals', {
+      title: $('title').value,
+      work: $('work').value,
+      amount: $('amount').value,
+      delivery: $('delivery').value,
+      reviewed: $('reviewed').checked,
+    });
+    if (!signedIn) return;
+    $('draft-form').reset();
+    $('draft').hidden = true;
+    $('status').textContent = `Published “${proposal.title}” with fixed terms. Copy its client link below.`;
+    await refreshProposals();
+  } catch (error) {
+    $('status').textContent = error.message;
+  } finally {
+    $('publish').disabled = false;
+  }
+});
 
 api('/api/session').then(() => setSignedIn(true)).catch(error => {
   $('status').textContent = error.message;
