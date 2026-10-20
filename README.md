@@ -1,5 +1,9 @@
 # ScopeShield
 
+<p align="center">
+  <img src="public/assets/scopeshield-logo.png" alt="ScopeShield logo" width="320">
+</p>
+
 **Turn extra client requests into reviewed, approved, paid work.**
 
 ScopeShield helps a freelancer compare a new client request with an existing agreement, review an AI explanation of potential extra work, publish fixed proposal terms, and collect payment through PayPal sandbox.

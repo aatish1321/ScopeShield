@@ -3,6 +3,8 @@
 body { margin: 0; }
 main { max-width: 850px; margin: 0 auto; padding: 32px 20px 60px; }
 header { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-logo { width: 72px; height: 88px; object-fit: cover; flex-shrink: 0; }
 h1 { margin: 0; font-size: 2rem; }
 h2 { margin-top: 0; font-size: 1.3rem; }
 h3 { font-size: 1rem; margin: 0 0 8px; }
@@ -26,4 +28,4 @@ blockquote { margin: 8px 0; padding-left: 16px; border-left: 3px solid #9aabbc; 
 .check input { width: auto; }
 a { color: #184b74; overflow-wrap: anywhere; }
 .proposal-text { white-space: pre-wrap; overflow-wrap: anywhere; }
-@media (max-width: 480px) { section { padding: 16px; } main { padding: 20px 12px; } }
+@media (max-width: 480px) { section { padding: 16px; } main { padding: 20px 12px; } header { flex-wrap: wrap; } }
