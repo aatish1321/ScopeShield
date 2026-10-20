@@ -1,0 +1,20 @@
+/devpost/learner-profile.md
+.env
+.env.*
+!.env.example
+
+# Runtime dependencies, private records, and local output
+node_modules/
+/data/
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.log
+/coverage/
+
+# Local private keys and credential bundles
+*.pem
+*.key
+*.p12
+*.pfx
