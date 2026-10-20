@@ -55,6 +55,11 @@ export function openStore(path = defaultPath) {
     BEFORE UPDATE OF id, token, title, work, delivery, amount_cents, currency, created_at ON proposals
     BEGIN SELECT RAISE(ABORT, 'Published terms cannot be changed'); END;
   `);
+  if (!db.prepare('PRAGMA table_info(proposals)').all().some(column => column.name === 'merchant_id')) {
+    db.exec('ALTER TABLE proposals ADD COLUMN merchant_id TEXT');
+  }
+  const paymentFields = new Set(['payment_status', 'accepted_at', 'order_id', 'approval_url', 'create_request_id',
+    'create_started_at', 'capture_request_id', 'capture_started_at', 'capture_id', 'paid_at', 'merchant_id']);
   const get = db.prepare('SELECT * FROM proposals WHERE token = ?');
   return {
     create({ title, work, delivery, amountCents }) {
@@ -65,6 +70,13 @@ export function openStore(path = defaultPath) {
     },
     get(token) { return validToken(token) ? get.get(token) : undefined; },
     list() { return db.prepare('SELECT * FROM proposals ORDER BY created_at DESC, rowid DESC').all(); },
+    updatePayment(token, fields) {
+      const keys = Object.keys(fields);
+      if (!keys.length || keys.some(key => !paymentFields.has(key))) throw new Error('Invalid payment update.');
+      db.prepare(`UPDATE proposals SET ${keys.map(key => `${key} = ?`).join(', ')} WHERE token = ?`)
+        .run(...keys.map(key => fields[key]), token);
+      return get.get(token);
+    },
     close() { db.close(); },
   };
 }

@@ -167,6 +167,7 @@ async function refreshProposals() {
     card.className = 'item';
     addText(card, 'h3', proposal.title);
     addText(card, 'p', `${usd(proposal.amountCents)} USD · ${proposal.status}`);
+    if (proposal.captureId) addText(card, 'p', `PayPal transaction: ${proposal.captureId}`);
     const link = document.createElement('a');
     link.href = `/p/${proposal.token}`;
     link.target = '_blank';
@@ -185,6 +186,21 @@ async function refreshProposals() {
       }
     });
     card.append(document.createElement('br'), copy);
+    const check = document.createElement('button');
+    check.type = 'button';
+    check.textContent = 'Check payment status';
+    check.addEventListener('click', async () => {
+      check.disabled = true;
+      try {
+        const updated = await api(`/api/proposals/${proposal.token}/status`, {});
+        $('status').textContent = `Payment status: ${updated.status}`;
+        await refreshProposals();
+      } catch (error) {
+        $('status').textContent = error.message;
+        check.disabled = false;
+      }
+    });
+    card.append(document.createTextNode(' '), check);
     $('proposals').append(card);
   }
 }

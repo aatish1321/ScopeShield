@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { compareRequest } from './analysis.js';
 import { AppError, loadConfig, validateProposal } from './validation.js';
 import { openStore, publicProposal, validToken } from './store.js';
+import { createPayments } from './paypal.js';
 
 const publicDirectory = fileURLToPath(new URL('../public/', import.meta.url));
 const sessionDuration = 8 * 60 * 60 * 1000;
@@ -18,6 +19,7 @@ export function createApp(config, { fetchApi = fetch, now = Date.now, store = op
   const secure = config.appUrl.protocol === 'https:';
   const cookieName = secure ? '__Host-scopeshield' : 'scopeshield';
   const cookieOptions = { httpOnly: true, sameSite: 'strict', secure, path: '/' };
+  const payments = createPayments(store, config, { fetchApi, now });
   app.disable('x-powered-by');
   app.set('trust proxy', false);
 
@@ -108,7 +110,17 @@ export function createApp(config, { fetchApi = fetch, now = Date.now, store = op
   app.get('/api/proposals/:token', (req, res) => {
     const row = store.get(req.params.token);
     if (!row) throw new AppError(404, 'Proposal unavailable. Check the link with your freelancer.');
-    res.json(publicProposal(row));
+    res.json({ ...publicProposal(row), checkoutAvailable: payments.configured });
+  });
+  const paymentLimit = throttle('payments', 60, 5 * 60 * 1000);
+  app.post('/api/proposals/:token/checkout', paymentLimit, async (req, res) => {
+    res.json(await payments.checkout(req.params.token, req.body?.accepted));
+  });
+  app.post('/api/proposals/:token/capture', paymentLimit, async (req, res) => {
+    res.json(await payments.capture(req.params.token));
+  });
+  app.post('/api/proposals/:token/status', paymentLimit, async (req, res) => {
+    res.json(await payments.status(req.params.token));
   });
   app.get('/p/:token', (req, res) => {
     if (!validToken(req.params.token) || !store.get(req.params.token)) {

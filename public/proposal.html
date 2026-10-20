@@ -18,7 +18,13 @@
       <h3>Price</h3><p id="amount"></p>
       <h3>Delivery change</h3><p id="delivery" class="proposal-text"></p>
       <h3>Payment status</h3><p id="payment-status"></p>
-      <p id="checkout-notice">PayPal sandbox checkout is not available yet. No payment has been taken.</p>
+      <p id="receipt" hidden></p>
+      <p id="checkout-notice">This demo uses PayPal sandbox only. No real funds move.</p>
+      <form id="checkout-form" hidden>
+        <label class="check"><input id="accepted" type="checkbox" required> I accept this proposal's work, price, and delivery change.</label>
+        <button id="pay" type="submit">Accept and continue to PayPal sandbox</button>
+      </form>
+      <button id="check-status" type="button" hidden>Check payment status</button>
       <p class="notice">These are fixed terms reviewed by your freelancer. Contact them about any changes. Anyone with this link can view this proposal; share it only with intended recipients.</p>
     </section>
   </main>

@@ -51,11 +51,16 @@ export function loadConfig(env = process.env) {
   }
   const port = Number(env.PORT || appUrl.port || 3000);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT must be 1–65535.');
+  const paypalClientId = env.PAYPAL_CLIENT_ID?.trim() || '';
+  const paypalSecret = env.PAYPAL_CLIENT_SECRET?.trim() || '';
+  if (Boolean(paypalClientId) !== Boolean(paypalSecret)) throw new Error('Set both PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET, or leave both blank to disable checkout.');
   return {
     appUrl,
     port,
     ownerKey: env.OWNER_ACCESS_KEY,
     groqKey: env.GROQ_API_KEY.trim(),
     groqModel: env.GROQ_MODEL?.trim() || 'openai/gpt-oss-20b',
+    paypalClientId,
+    paypalSecret,
   };
 }

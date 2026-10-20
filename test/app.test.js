@@ -20,7 +20,8 @@ const reply = () => new Response(JSON.stringify({ choices: [{ finish_reason: 'st
 
 async function start(t, options = {}) {
   const config = loadConfig({ GROQ_API_KEY: 'server-private-test-key', OWNER_ACCESS_KEY: ownerKey,
-    APP_URL: options.secure ? 'https://127.0.0.1' : 'http://127.0.0.1' });
+    APP_URL: options.secure ? 'https://127.0.0.1' : 'http://127.0.0.1',
+    ...(options.payments ? { PAYPAL_CLIENT_ID: 'test-client', PAYPAL_CLIENT_SECRET: 'test-paypal-secret' } : {}) });
   const store = options.store || openStore(':memory:');
   const server = createApp(config, { store, fetchApi: options.fetchApi || (async () => reply()), now: options.now || Date.now }).listen(0, '127.0.0.1');
   await once(server, 'listening');
@@ -88,7 +89,7 @@ test('HTTPS configuration sets Secure and host-scoped cookie', async t => {
 
 test('same-origin JSON is required even for login/logout; host spoofing fails', async t => {
   const { request, base } = await start(t);
-  for (const path of ['/api/login', '/api/logout', '/api/analyze']) {
+  for (const path of ['/api/login', '/api/logout', '/api/analyze', '/api/proposals/test/checkout', '/api/proposals/test/capture', '/api/proposals/test/status']) {
     for (const origin of ['', 'null', 'https://attacker.example']) {
       assert.equal((await request(path, {}, { headers: { Origin: origin } })).status, 403);
     }
@@ -229,6 +230,43 @@ test('published client link survives app/store reopen and owner logout', async t
     assert.equal(response.status, 200);
     assert.equal((await response.json()).amountCents, 25000);
   });
+});
+
+test('HTTP payment journey ignores browser amounts/order IDs and records payment for owner and client', async t => {
+  let order;
+  let captures = 0;
+  const { request, login } = await start(t, { payments: true, fetchApi: async (url, options) => {
+    if (url.endsWith('/v1/oauth2/token')) return new Response(JSON.stringify({ access_token: 'token', expires_in: 3600 }));
+    if (url.endsWith('/v2/checkout/orders') && options.method === 'POST') {
+      order = { id: 'HTTPORDER12345678', status: 'PAYER_ACTION_REQUIRED',
+        purchase_units: [{ ...JSON.parse(options.body).purchase_units[0], payee: { merchant_id: 'HTTPMERCHANT1234' } }],
+        links: [{ rel: 'payer-action', href: 'https://www.sandbox.paypal.com/checkoutnow?token=HTTPORDER12345678' }] };
+    } else if (url.endsWith('/capture')) {
+      captures++;
+      assert.equal(order.status, 'APPROVED');
+      order.status = 'COMPLETED';
+      order.purchase_units[0].payments = { captures: [{ id: 'HTTPCAPTURE123456', status: 'COMPLETED', amount: { currency_code: 'USD', value: '250.00' } }] };
+    } else assert.ok(url.endsWith(`/v2/checkout/orders/${order.id}`));
+    return new Response(JSON.stringify(order));
+  } });
+  const cookie = await login();
+  const published = await request('/api/proposals', { title: 'Store', work: 'Ten products', delivery: 'Five days', amount: '250', reviewed: true }, { cookie });
+  const { token } = await published.json();
+  assert.equal((await request(`/api/proposals/${token}/capture`, {})).status, 409);
+  assert.equal((await request(`/api/proposals/${token}/checkout`, { accepted: false })).status, 400);
+  const checkout = await request(`/api/proposals/${token}/checkout`, { accepted: true, amount: '0.01', currency: 'EUR', orderId: 'FAKE' });
+  assert.equal(checkout.status, 200);
+  assert.equal((await checkout.json()).proposal.amountCents, 25000);
+  assert.equal(order.purchase_units[0].amount.value, '250.00');
+  assert.equal((await request(`/api/proposals/${token}/capture?token=FAKE`, { orderId: 'FAKE' })).status, 409);
+  order.status = 'APPROVED';
+  const captured = await request(`/api/proposals/${token}/capture?token=FAKE`, { orderId: 'FAKE', amount: '0.01' });
+  assert.equal(captured.status, 200);
+  assert.equal((await captured.json()).status, 'paid');
+  assert.equal((await request(`/api/proposals/${token}/capture`, {})).status, 200);
+  assert.equal(captures, 1);
+  assert.equal((await (await request(`/api/proposals/${token}`)).json()).status, 'paid');
+  assert.equal((await (await request('/api/proposals', undefined, { cookie })).json())[0].status, 'paid');
 });
 
 test('browser code uses safe text sinks and no persistent credential/data storage', async () => {
