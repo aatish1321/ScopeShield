@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ScopeShield — Freelancer workspace</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/owner.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <div><h1>ScopeShield</h1><p>Turn extra requests into clear agreements.</p></div>
+      <button id="logout" type="button" hidden>Log out</button>
+    </header>
+    <p id="status" role="status" aria-live="polite"></p>
+    <section id="login-panel" aria-labelledby="login-title">
+      <h2 id="login-title">Freelancer login</h2>
+      <p>Use the owner access key configured on your server.</p>
+      <form id="login-form">
+        <label for="owner-key">Owner access key</label>
+        <input id="owner-key" type="password" autocomplete="current-password" required maxlength="512">
+        <button type="submit">Log in</button>
+      </form>
+    </section>
+    <div id="workspace" hidden>
+      <section aria-labelledby="compare-title">
+        <h2 id="compare-title">1. Compare the request</h2>
+        <p>AI is advisory. Review its reasoning before proposing extra work. Submitted text is sent to Groq; use synthetic examples while testing.</p>
+        <button type="button" id="example">Load website example</button>
+        <form id="analysis-form">
+          <label for="agreement">Original agreement</label>
+          <textarea id="agreement" rows="6" required maxlength="20000" placeholder="Paste the work and terms originally agreed with your client."></textarea>
+          <label for="request">New client request</label>
+          <textarea id="request" rows="4" required maxlength="20000" placeholder="Paste what the client is asking to add or change."></textarea>
+          <button id="analyze" type="submit">Analyze request</button>
+        </form>
+      </section>
+      <section id="comparison" aria-labelledby="comparison-title" hidden>
+        <h2 id="comparison-title">Comparison</h2>
+        <p id="classification"></p>
+        <p id="summary"></p>
+        <div id="items"></div>
+      </section>
+      <section id="draft" aria-labelledby="draft-title" hidden>
+        <h2 id="draft-title">2. Review your draft</h2>
+        <p id="review-warning">You decide what is extra, what it costs, and when it will be delivered.</p>
+        <form id="draft-form">
+          <label for="title">Proposal title</label>
+          <input id="title" maxlength="160" required>
+          <label for="work">Additional work</label>
+          <textarea id="work" rows="5" maxlength="10000" required></textarea>
+          <label for="amount">Price (USD)</label>
+          <input id="amount" type="text" inputmode="decimal" maxlength="12" placeholder="250.00" aria-describedby="amount-help" required>
+          <small id="amount-help">Enter your price in US dollars. No currency conversion.</small>
+          <label for="delivery">Delivery change</label>
+          <textarea id="delivery" rows="2" maxlength="1000" placeholder="For example, three additional working days." required></textarea>
+          <p class="notice">Draft only. Publishing and payment are not available yet.</p>
+        </form>
+      </section>
+      <p class="notice">Unsaved agreement text, analysis, and draft edits are held in this page’s memory only. Reloading or logging out clears them.</p>
+    </div>
+  </main>
+</body>
+</html>
