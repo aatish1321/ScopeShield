@@ -16,6 +16,7 @@ input, textarea { width: 100%; padding: 10px 12px; border: 1px solid #778392; bo
 textarea { resize: vertical; }
 button { padding: 10px 16px; border: 1px solid #184b74; border-radius: 4px; background: #184b74; color: white; cursor: pointer; margin-top: 16px; }
 header button { margin: 0; }
+.danger { background: #fff; border-color: #9c2424; color: #9c2424; }
 button:disabled { opacity: .6; cursor: wait; }
 :focus-visible { outline: 3px solid #aa5800; outline-offset: 3px; }
 small, .notice { color: #465260; }

@@ -39,3 +39,30 @@ test('public views expose only approved terms and payment status', () => {
     assert.ok(!JSON.stringify(value).includes('private agreement'));
   } finally { store.close(); }
 });
+
+test('deletion persists, hides the link, and retains payment records and fixed terms', t => {
+  const directory = mkdtempSync(join(tmpdir(), 'scopeshield-delete-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const path = join(directory, 'proposals.sqlite');
+  const store = openStore(path);
+  const row = store.create({ title: 'Store', work: 'Ten products', delivery: 'Five days', amountCents: 25000 });
+  store.updatePayment(row.token, { payment_status: 'paid', capture_id: 'CAPTURE12345678901', order_id: 'ORDER12345678901' });
+  store.remove(row.token);
+  assert.equal(store.get(row.token), undefined);
+  assert.equal(store.list().length, 0);
+  assert.equal(store.updatePayment(row.token, { payment_status: 'unpaid' }), undefined);
+  store.close();
+  const reopened = openStore(path);
+  assert.equal(reopened.get(row.token), undefined);
+  assert.equal(reopened.list().length, 0);
+  reopened.close();
+  const db = new DatabaseSync(path);
+  const retained = db.prepare('SELECT * FROM proposals WHERE token = ?').get(row.token);
+  assert.ok(retained.deleted_at);
+  assert.equal(retained.payment_status, 'paid');
+  assert.equal(retained.capture_id, 'CAPTURE12345678901');
+  assert.equal(retained.order_id, 'ORDER12345678901');
+  assert.equal(retained.amount_cents, 25000);
+  assert.equal(retained.work, 'Ten products');
+  db.close();
+});

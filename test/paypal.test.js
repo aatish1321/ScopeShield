@@ -162,6 +162,7 @@ test('concurrent checkout is blocked while the first request is in flight', asyn
   } });
   const first = payments.checkout(row.token, true);
   await started;
+  assert.throws(() => payments.remove(row.token), { status: 409 });
   await assert.rejects(payments.checkout(row.token, true), { status: 409 });
   assert.ok(store.get(row.token).create_request_id);
   release();
@@ -249,4 +250,42 @@ test('voided orders and failed captures do not start replacement charges', async
     assert.equal(fake.orders.size, 1);
     assert.equal(capturePosts(fake), 0);
   }
+});
+
+test('deletion deactivates ready/paid links without cancelling, refunding or starting charges', async t => {
+  for (const paid of [false, true]) {
+    const { payments, fake, row, remote, store } = setup(t);
+    await payments.checkout(row.token, true);
+    if (paid) { remote().status = 'APPROVED'; await payments.capture(row.token); }
+    const previousCalls = fake.calls.length;
+    payments.remove(row.token);
+    assert.equal(store.get(row.token), undefined);
+    assert.equal(store.list().length, 0);
+    for (const operation of [() => payments.checkout(row.token, true), () => payments.capture(row.token), () => payments.status(row.token)]) {
+      await assert.rejects(operation(), { status: 404 });
+    }
+    assert.equal(fake.calls.length, previousCalls);
+    assert.equal(fake.orders.size, 1);
+  }
+});
+
+test('uncertain or processing payment outcomes block deletion', t => {
+  for (const state of ['creating', 'capturing', 'pending', 'unknown', 'ready']) {
+    const { payments, row, store } = setup(t);
+    store.updatePayment(row.token, { payment_status: state,
+      ...(state === 'ready' ? { capture_request_id: 'previous-capture', capture_started_at: new Date().toISOString() } : {}) });
+    assert.throws(() => payments.remove(row.token), { status: 409 });
+    assert.ok(store.get(row.token));
+  }
+});
+
+test('inconsistent completed capture/order status cannot turn an uncertain payment into deletable failure', async t => {
+  const { payments, row, store, remote } = setup(t);
+  await payments.checkout(row.token, true);
+  store.updatePayment(row.token, { payment_status: 'capturing', capture_request_id: 'capture-started', capture_started_at: new Date().toISOString() });
+  remote().status = 'APPROVED';
+  remote().purchase_units[0].payments = { captures: [{ id: 'CAPTURE12345678901', status: 'COMPLETED', amount: { currency_code: 'USD', value: '250.00' } }] };
+  await assert.rejects(payments.status(row.token), { status: 502 });
+  assert.throws(() => payments.remove(row.token), { status: 409 });
+  assert.equal(store.get(row.token).payment_status, 'capturing');
 });

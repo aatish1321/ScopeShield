@@ -27,7 +27,7 @@ AI does not set binding prices, promise delivery dates, send messages, or charge
 
 | Check | Evidence |
 | --- | --- |
-| Automated behavior and security checks | `npm test`: 46 passing tests, including the complete HTTP payment journey with mocked PayPal responses |
+| Automated behavior and security checks | `npm test`: 51 passing tests, including the complete HTTP payment journey with mocked PayPal responses |
 | Real Groq access | Synthetic additional, included, and unclear cases exercised successfully, including the multiline website/store example |
 | Persistence | A published synthetic proposal and its original client link survived an actual application restart |
 | Real PayPal sandbox access | OAuth, order creation, and order retrieval passed; stored USD amount, reference, merchant, and approval destination verified |
@@ -109,6 +109,8 @@ For buyer checkout, use **Testing Tools → Sandbox Accounts** to obtain the ema
 8. Confirm **Paid** and the sandbox transaction reference on the client page. Refresh the freelancer's proposal list or use **Check payment status**.
 9. Reopen the paid link: no second checkout is offered. Restarting the app preserves the proposal and its payment record.
 
+Each published proposal has a **Delete proposal** button in the owner workspace. Confirming removes it from the list and deactivates its client link, while retaining its database record and payment references. Deletion does not cancel or refund a PayPal payment. It is blocked during an active payment operation or while its outcome is pending/unconfirmed; check and resolve payment status first.
+
 For cancellation, publish another synthetic proposal, start checkout, and cancel in PayPal. Cancellation must not report a successful payment. Retry uses the existing saved order rather than creating a new one.
 
 To exercise other AI outcomes, request a contact form already included in the agreement, or ask for an unnamed feature from an unavailable prior discussion. Expected outcomes are **included** and **unclear**, respectively; all AI interpretations remain subject to human review.
@@ -155,7 +157,7 @@ These are implemented and tested prototype controls, not a guarantee of producti
 npm test
 ```
 
-The 46 checks cover authentication, session expiry/logout, CSRF/origin checks, private-file isolation, safe text rendering, input/evidence validation, exact money parsing, immutable terms, restart persistence, client/owner isolation, acceptance, payment idempotency, concurrent requests, timeouts, pending/failed/completed states, and amount/currency/reference/merchant mismatches.
+The 51 checks cover authentication, session expiry/logout, CSRF/origin checks, private-file isolation, safe text rendering, input/evidence validation, exact money parsing, immutable terms, restart persistence, client/owner isolation, acceptance, payment idempotency, concurrent requests, timeouts, pending/failed/completed states, amount/currency/reference/merchant mismatches, and owner-only deletion with retained records, deactivated links and payment-race protection.
 
 Automated Groq/PayPal responses are mocked. The verification table above distinguishes these tests from actual external API checks.
 

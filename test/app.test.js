@@ -89,7 +89,7 @@ test('HTTPS configuration sets Secure and host-scoped cookie', async t => {
 
 test('same-origin JSON is required even for login/logout; host spoofing fails', async t => {
   const { request, base } = await start(t);
-  for (const path of ['/api/login', '/api/logout', '/api/analyze', '/api/proposals/test/checkout', '/api/proposals/test/capture', '/api/proposals/test/status']) {
+  for (const path of ['/api/login', '/api/logout', '/api/analyze', '/api/proposals/test/checkout', '/api/proposals/test/capture', '/api/proposals/test/status', '/api/proposals/test/delete']) {
     for (const origin of ['', 'null', 'https://attacker.example']) {
       assert.equal((await request(path, {}, { headers: { Origin: origin } })).status, 403);
     }
@@ -230,6 +230,26 @@ test('published client link survives app/store reopen and owner logout', async t
     assert.equal(response.status, 200);
     assert.equal((await response.json()).amountCents, 25000);
   });
+});
+
+test('only owner can delete; deleted proposals disappear and client/payment links stop working', async t => {
+  let externalCalls = 0;
+  const { request, login } = await start(t, { payments: true, fetchApi: async () => { externalCalls++; throw new Error('Unexpected provider call'); } });
+  const cookie = await login();
+  const saved = await request('/api/proposals', { reviewed: true, title: 'Store', work: 'Ten products', amount: '250', delivery: 'Five days' }, { cookie });
+  const { token } = await saved.json();
+  assert.equal((await request(`/api/proposals/${token}/delete`, {})).status, 401);
+  assert.equal((await request(`/api/proposals/${token}/delete`, {}, { cookie, headers: { Origin: 'https://attacker.example' } })).status, 403);
+  assert.equal((await request(`/api/proposals/${token}`)).status, 200);
+  assert.equal((await request(`/api/proposals/${token}/delete`, {}, { cookie })).status, 200);
+  assert.deepEqual(await (await request('/api/proposals', undefined, { cookie })).json(), []);
+  assert.equal((await request(`/api/proposals/${token}`)).status, 404);
+  assert.equal((await request(`/p/${token}`)).status, 404);
+  for (const action of ['checkout', 'capture', 'status']) {
+    assert.equal((await request(`/api/proposals/${token}/${action}`, { accepted: true })).status, 404);
+  }
+  assert.equal((await request(`/api/proposals/${token}/delete`, {}, { cookie })).status, 404);
+  assert.equal(externalCalls, 0);
 });
 
 test('HTTP payment journey ignores browser amounts/order IDs and records payment for owner and client', async t => {

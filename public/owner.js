@@ -201,6 +201,24 @@ async function refreshProposals() {
       }
     });
     card.append(document.createTextNode(' '), check);
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'danger';
+    remove.textContent = 'Delete proposal';
+    remove.setAttribute('aria-label', `Delete proposal: ${proposal.title}`);
+    remove.addEventListener('click', async () => {
+      if (!window.confirm(`Delete “${proposal.title}”? This removes it from your workspace and deactivates its client link. The database record and payment references are retained. This does not cancel or refund a PayPal payment.`)) return;
+      remove.disabled = true;
+      try {
+        await api(`/api/proposals/${proposal.token}/delete`, {});
+        $('status').textContent = 'Proposal deleted. Its client link is no longer available.';
+        await refreshProposals();
+      } catch (error) {
+        $('status').textContent = error.message;
+        remove.disabled = false;
+      }
+    });
+    card.append(document.createTextNode(' '), remove);
     $('proposals').append(card);
   }
 }

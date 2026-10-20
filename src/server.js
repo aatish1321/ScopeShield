@@ -107,6 +107,10 @@ export function createApp(config, { fetchApi = fetch, now = Date.now, store = op
     const row = store.create(validateProposal(req.body));
     res.status(201).json({ ...publicProposal(row), token: row.token });
   });
+  app.post('/api/proposals/:token/delete', requireOwner, (req, res) => {
+    payments.remove(req.params.token);
+    res.json({ ok: true });
+  });
   app.get('/api/proposals/:token', (req, res) => {
     const row = store.get(req.params.token);
     if (!row) throw new AppError(404, 'Proposal unavailable. Check the link with your freelancer.');

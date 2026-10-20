@@ -58,9 +58,12 @@ export function openStore(path = defaultPath) {
   if (!db.prepare('PRAGMA table_info(proposals)').all().some(column => column.name === 'merchant_id')) {
     db.exec('ALTER TABLE proposals ADD COLUMN merchant_id TEXT');
   }
+  if (!db.prepare('PRAGMA table_info(proposals)').all().some(column => column.name === 'deleted_at')) {
+    db.exec('ALTER TABLE proposals ADD COLUMN deleted_at TEXT');
+  }
   const paymentFields = new Set(['payment_status', 'accepted_at', 'order_id', 'approval_url', 'create_request_id',
     'create_started_at', 'capture_request_id', 'capture_started_at', 'capture_id', 'paid_at', 'merchant_id']);
-  const get = db.prepare('SELECT * FROM proposals WHERE token = ?');
+  const get = db.prepare('SELECT * FROM proposals WHERE token = ? AND deleted_at IS NULL');
   return {
     create({ title, work, delivery, amountCents }) {
       const token = randomBytes(32).toString('hex');
@@ -69,11 +72,15 @@ export function openStore(path = defaultPath) {
       return get.get(token);
     },
     get(token) { return validToken(token) ? get.get(token) : undefined; },
-    list() { return db.prepare('SELECT * FROM proposals ORDER BY created_at DESC, rowid DESC').all(); },
+    list() { return db.prepare('SELECT * FROM proposals WHERE deleted_at IS NULL ORDER BY created_at DESC, rowid DESC').all(); },
+    remove(token) {
+      db.prepare('UPDATE proposals SET deleted_at = ? WHERE token = ? AND deleted_at IS NULL')
+        .run(new Date().toISOString(), token);
+    },
     updatePayment(token, fields) {
       const keys = Object.keys(fields);
       if (!keys.length || keys.some(key => !paymentFields.has(key))) throw new Error('Invalid payment update.');
-      db.prepare(`UPDATE proposals SET ${keys.map(key => `${key} = ?`).join(', ')} WHERE token = ?`)
+      db.prepare(`UPDATE proposals SET ${keys.map(key => `${key} = ?`).join(', ')} WHERE token = ? AND deleted_at IS NULL`)
         .run(...keys.map(key => fields[key]), token);
       return get.get(token);
     },

@@ -107,6 +107,9 @@ export function createPayments(store, config, { fetchApi = fetch, now = Date.now
       throw new AppError(502, 'PayPal capture verification failed. Do not retry payment; contact your freelancer.');
     }
     let status;
+    if (capture?.status === 'COMPLETED' && order.status !== 'COMPLETED') {
+      throw new AppError(502, 'PayPal returned inconsistent payment status. Check payment status before making changes.');
+    }
     if (capture?.status === 'COMPLETED' && order.status === 'COMPLETED') status = 'paid';
     else if (capture?.status === 'PENDING') status = 'pending';
     else if (capture || order.status === 'VOIDED') status = 'failed';
@@ -135,6 +138,15 @@ export function createPayments(store, config, { fetchApi = fetch, now = Date.now
   const view = row => ({ ...publicProposal(row), checkoutAvailable: configured });
   return {
     configured,
+    remove(token) {
+      if (active.has(token)) throw new AppError(409, 'A payment operation is running. Wait, then check payment status before deleting.');
+      const row = get(token);
+      if (['creating', 'capturing', 'pending', 'unknown'].includes(row.payment_status) ||
+          (row.capture_request_id && !['paid', 'failed'].includes(row.payment_status))) {
+        throw new AppError(409, 'Check and resolve the payment outcome before deleting this proposal.');
+      }
+      store.remove(token);
+    },
     async status(token) {
       return locked(token, async row => view((await reconcile(row)).row));
     },
