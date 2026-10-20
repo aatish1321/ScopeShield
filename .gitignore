@@ -1,4 +1,13 @@
-/devpost/learner-profile.md
+# Local planning, AI tooling, and machine configuration
+/devpost/
+/.agents/
+/.claude/
+/.codex/
+/.aws/
+/agent/
+/skills-lock.json
+
+# Local environment secrets; publish only the blank example
 .env
 .env.*
 !.env.example
