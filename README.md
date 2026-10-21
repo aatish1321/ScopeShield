@@ -27,13 +27,13 @@ AI does not set binding prices, promise delivery dates, send messages, or charge
 
 | Check | Evidence |
 | --- | --- |
-| Automated behavior and security checks | `npm test`: 51 passing tests, including the complete HTTP payment journey with mocked PayPal responses |
+| Automated behavior and security checks | `npm test`: 56 passing tests, including the complete HTTP payment journey with mocked PayPal responses |
 | Real Groq access | Synthetic additional, included, and unclear cases exercised successfully, including the multiline website/store example |
 | Persistence | A published synthetic proposal and its original client link survived an actual application restart |
 | Real PayPal sandbox access | OAuth, order creation, and order retrieval passed; stored USD amount, reference, merchant, and approval destination verified |
 | Buyer approval and live sandbox capture | **Awaiting hands-on verification with a sandbox buyer**; automated capture tests use mocked responses |
 | Repository and licensing | Public GitHub repository; top-level MIT license recognized by GitHub |
-| Browser visual/keyboard review | Initial comparison flow tried by the builder; full client checkout review is still pending |
+| Browser visual/keyboard review | Updated landing, account, workspace, and client layouts await hands-on browser review; no browser automation surface was available |
 
 The payment implementation is available for testing. The submission demo video has not been recorded yet. No real-money payment flow is enabled.
 
@@ -64,20 +64,11 @@ Open `.env` in your editor and configure:
 | --- | --- |
 | `GROQ_API_KEY` | Server-side Groq credential; required for startup |
 | `GROQ_MODEL` | Defaults to `openai/gpt-oss-20b`, hosted by **Groq**; no OpenAI API key is needed |
-| `OWNER_ACCESS_KEY` | Private freelancer login credential; use a randomly generated value of at least 32 characters |
 | `PAYPAL_CLIENT_ID` | Client ID from your PayPal **Sandbox / Merchant** app |
 | `PAYPAL_CLIENT_SECRET` | Secret from that same sandbox app; required together with the client ID |
 | `APP_URL` | Browser origin, normally `http://localhost:3000`; used for trusted host/origin checks and PayPal return URLs |
 | `PORT` | Local server port; defaults to `3000` |
 | `NODE_ENV` | `development` locally; production configuration requires HTTPS |
-
-Generate your own owner login key locally:
-
-```sh
-openssl rand -hex 32
-```
-
-Paste the generated value into `OWNER_ACCESS_KEY` in `.env`. Do not commit it. Do not use example/test credentials from source code.
 
 Start the app:
 
@@ -85,9 +76,21 @@ Start the app:
 npm start
 ```
 
-Open **http://localhost:3000**. Log in with your configured owner key.
+Open **http://localhost:3000** to see the landing page. Choose **Get started** to create an account with your name, email, and a unique 15–128 character passphrase. Returning users can log in. The workspace is at `/app`. No owner access key is required.
+
+Accounts and published proposals are saved in the private SQLite database, so you can return after a restart. Each account sees and manages only its own proposals. Unpublished inputs and draft edits clear on reload.
 
 Both PayPal fields can be left blank to explore the AI/proposal flow with checkout disabled. The complete judge demo requires both. If only one is set, startup fails with a configuration error.
+
+### Existing installations: preserve previous proposals
+
+The database schema upgrades automatically without deleting proposals or changing their client links. Proposals made before accounts existed stay unassigned; signing up cannot claim them. Create your account, then explicitly assign the unassigned records locally as the repository owner:
+
+```sh
+node scripts/assign-legacy.js your-account@example.com --confirm
+```
+
+This assigns **all** previously unassigned proposal records, including retained deleted records, to that existing account. It does not change their terms, payment references, or deletion state. Do this only on your own installation after checking the account email. There is no public claim endpoint. Existing assigned records cannot be reassigned. An old `OWNER_ACCESS_KEY` entry in a local `.env` is ignored and may be removed.
 
 ### Obtain provider credentials
 
@@ -99,17 +102,17 @@ For buyer checkout, use **Testing Tools → Sandbox Accounts** to obtain the ema
 
 ## Demo walkthrough
 
-1. Log in to the freelancer workspace and click **Load website example**. This loads synthetic text, not a canned AI result.
+1. Create an account or log in to the freelancer workspace and click **Load website example**. This loads synthetic text, not a canned AI result.
 2. Click **Analyze request**. Inspect the classification, quoted source evidence, and explanation from a real Groq call.
 3. Edit the proposal: title `Add a ten-product store`, work `Product catalog, shopping cart, PayPal checkout, and product management`, price `250.00`, delivery change `Five additional working days`.
 4. Check the freelancer review confirmation and click **Approve and publish proposal**.
-5. Open the resulting client link in a separate browser or private window on the same computer. It requires no owner login and shows only approved terms.
+5. Open the resulting client link in a separate browser or private window on the same computer. It requires no ScopeShield login and shows only approved terms.
 6. Check the client acceptance box, then continue to PayPal sandbox. Sign in with the separate sandbox buyer account and approve the payment.
 7. On return, ScopeShield requests server-side capture and verifies the actual PayPal order. A redirect or query parameter alone never marks a proposal paid.
 8. Confirm **Paid** and the sandbox transaction reference on the client page. Refresh the freelancer's proposal list or use **Check payment status**.
 9. Reopen the paid link: no second checkout is offered. Restarting the app preserves the proposal and its payment record.
 
-Each published proposal has a **Delete proposal** button in the owner workspace. Confirming removes it from the list and deactivates its client link, while retaining its database record and payment references. Deletion does not cancel or refund a PayPal payment. It is blocked during an active payment operation or while its outcome is pending/unconfirmed; check and resolve payment status first.
+Each published proposal has a **Delete proposal** button in the freelancer workspace. Confirming removes it from the list and deactivates its client link, while retaining its database record and payment references. Deletion does not cancel or refund a PayPal payment. It is blocked during an active payment operation or while its outcome is pending/unconfirmed; check and resolve payment status first.
 
 For cancellation, publish another synthetic proposal, start checkout, and cancel in PayPal. Cancellation must not report a successful payment. Retry uses the existing saved order rather than creating a new one.
 
@@ -139,11 +142,12 @@ The UI uses plain HTML/CSS/JavaScript. Express is the only installed runtime dep
 ## Security and data boundaries
 
 - Secrets stay in server-side `.env`. `.gitignore` excludes environment variants, runtime databases/journals, private keys, dependencies, and local workflow files. Only `.env.example` with blank credential fields is committed. Ignore rules do not remove previously tracked files; staged contents must also be reviewed.
+- Passwords use independently salted scrypt hashes (`N=32768, r=8, p=3`), with bounded concurrent hashing. Plaintext passwords are never stored. These parameters follow the [OWASP scrypt guidance](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#scrypt).
 - Login uses a random, eight-hour, server-managed session. The server stores a hash of the session token; its cookie is HttpOnly, SameSite=Strict, and Secure over configured HTTPS. Logout or server restart invalidates the session.
-- No localStorage or sessionStorage is used. Unpublished agreement text, analysis, and draft edits remain in page memory and clear on reload/logout. Published terms and payment metadata persist in `data/scopeshield.sqlite`; the app does not retain the original agreement/request or raw AI analysis in that database.
+- No localStorage or sessionStorage is used. Unpublished agreement text, analysis, and draft edits remain in page memory and clear on reload/logout. Accounts, published terms, and payment metadata persist in `data/scopeshield.sqlite`; the app does not retain the original agreement/request or raw AI analysis in that database.
 - Groq receives submitted document text for analysis. Use synthetic data for evaluation and review [Groq's data policy](https://console.groq.com/docs/your-data) before supplying confidential client material.
 - Only `public/` is web-served. Environment files, source, Git metadata, database files, and local plans are not accessible over HTTP. The local `.env` and database use `0600` permissions; the data directory uses `0700`.
-- Owner APIs require an unexpired session. State-changing requests require the exact configured Origin and JSON content type. Host checks resist DNS rebinding; proxy headers are not trusted. Login, analysis, publishing, and payment operations are throttled.
+- Workspace APIs require an unexpired account session. Proposal listing and deletion are scoped to the session’s user; client-supplied owner identifiers are ignored. State-changing requests require the exact configured Origin and JSON content type. Host checks resist DNS rebinding; proxy headers are not trusted. Signup, login, analysis, publishing, and payment operations are throttled. Limits are per connecting IP; behind a reverse proxy this may share limits across users because proxy headers are not trusted.
 - User and AI content renders as text rather than HTML. Responses use no-store/no-referrer, a restrictive CSP, anti-framing, and content-type protections. Sandbox approval destinations are allowlisted.
 - USD amounts are parsed as integer cents and fixed at publication. Database rules prevent later edits to published terms. Client links are random capability URLs: **anyone holding a link can view and interact with that proposal**, so share them only with intended recipients.
 - Separate create/capture request IDs are saved before external calls. In-process per-proposal locking blocks concurrent payment operations. Timeouts are reconciled against the existing order. Paid/pending proposals cannot start new charges, and unverifiable states are never presented as confirmed payment.
@@ -157,14 +161,14 @@ These are implemented and tested prototype controls, not a guarantee of producti
 npm test
 ```
 
-The 51 checks cover authentication, session expiry/logout, CSRF/origin checks, private-file isolation, safe text rendering, input/evidence validation, exact money parsing, immutable terms, restart persistence, client/owner isolation, acceptance, payment idempotency, concurrent requests, timeouts, pending/failed/completed states, amount/currency/reference/merchant mismatches, and owner-only deletion with retained records, deactivated links and payment-race protection.
+The 56 checks cover authentication, session expiry/logout, CSRF/origin checks, private-file isolation, safe text rendering, input/evidence validation, exact money parsing, immutable terms, restart persistence, client/workspace and cross-account isolation, acceptance, payment idempotency, concurrent requests, timeouts, pending/failed/completed states, amount/currency/reference/merchant mismatches, and owner-only deletion with retained records, deactivated links and payment-race protection.
 
 Automated Groq/PayPal responses are mocked. The verification table above distinguishes these tests from actual external API checks.
 
 | Symptom | What to check |
 | --- | --- |
 | Startup says a key is missing | Fill the named entry in local `.env`, then restart |
-| Login fails | Use `OWNER_ACCESS_KEY`, not a provider credential; restarts require a fresh login |
+| Login fails | Use your account email and passphrase; restarts require a fresh login. This prototype has no password recovery |
 | Host/origin rejected | Open the exact `APP_URL`, including hostname and port |
 | Groq rejects the model/schema | Configure a Groq model supporting strict structured output |
 | Invalid comparison evidence | The model could not quote the source faithfully after its bounded retry; retry or clarify the text, and review its reasoning |
@@ -176,16 +180,17 @@ Automated Groq/PayPal responses are mocked. The verification table above disting
 
 ## Prototype limits
 
-Single freelancer, single server process, USD only, pasted text, fixed published proposals, and sandbox payments. No account registration, teams, email delivery, file extraction, automatic pricing, real-money mode, background webhooks, refunds/disputes, or multiple server replicas. Payment state is refreshed on demand. Visual polish and deployment are deferred.
+Multiple freelancer accounts on one server process, USD only, pasted text, fixed published proposals, and sandbox payments. All accounts use the same configured sandbox merchant; accounts do not connect independent PayPal sellers. No email verification, password recovery, teams, email delivery, file extraction, automatic pricing, real-money mode, background webhooks, refunds/disputes, or multiple server replicas. Payment state is refreshed on demand. Use unique demo credentials; public production use needs email verification/recovery and merchant onboarding. Deployment is not provisioned.
 
 ## Source map and license
 
-- `src/server.js`: HTTP routes, owner sessions, request boundaries, and startup.
+- `src/server.js`: HTTP routes, account sessions, ownership checks, request boundaries, and startup.
+- `src/auth.js`: account input validation and salted password hashing.
 - `src/analysis.js`: Groq prompt, schema, evidence validation, and bounded correction.
 - `src/validation.js`: configuration, text, review confirmation, and exact USD amounts.
 - `src/store.js`: private SQLite records, immutable terms, and payment metadata.
 - `src/paypal.js`: sandbox OAuth, order creation, capture, reconciliation, and retry protection.
-- `public/`: freelancer and client interfaces.
+- `public/`: landing page, signup/login, freelancer workspace, and client proposal interfaces, adapted from the supplied Stitch design references.
 - `test/`: synthetic automated checks; no real API secrets.
 
 All project source, assets, and run instructions are in this public repository. Source is available under the **MIT License**, provided in the top-level [LICENSE](LICENSE) file.

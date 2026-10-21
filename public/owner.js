@@ -21,16 +21,15 @@ async function api(path, body, signal) {
 
 function setSignedIn(value) {
   signedIn = value;
-  $('login-panel').hidden = value;
-  $('workspace').hidden = !value;
-  $('logout').hidden = !value;
   if (!value) {
     analysisController?.abort();
     $('analysis-form').reset();
     $('draft-form').reset();
     clearComparison();
     $('proposals').replaceChildren();
+    window.location.replace('/login');
   } else {
+    $('workspace').hidden = false;
     refreshProposals().catch(error => { $('status').textContent = error.message; });
   }
 }
@@ -52,6 +51,7 @@ function addText(parent, tag, text) {
 function renderComparison(result) {
   const labels = { additional: 'Potential additional work', included: 'Appears already included', unclear: 'Needs clarification' };
   $('classification').textContent = labels[result.classification];
+  $('classification').className = result.classification === 'included' ? 'badge' : 'badge warning';
   $('summary').textContent = result.summary;
   $('items').replaceChildren();
   for (const [index, item] of result.items.entries()) {
@@ -74,32 +74,12 @@ function renderComparison(result) {
     : 'The AI has not established additional work. Clarify the request with your client before proposing any charge.';
 }
 
-$('login-form').addEventListener('submit', async event => {
-  event.preventDefault();
-  const key = $('owner-key').value;
-  $('owner-key').value = '';
-  const button = event.submitter;
-  button.disabled = true;
-  try {
-    await api('/api/login', { key });
-    setSignedIn(true);
-    $('status').textContent = 'Logged in. Paste an agreement and a new request to begin.';
-    $('agreement').focus();
-  } catch (error) {
-    $('status').textContent = error.message;
-    $('owner-key').focus();
-  } finally {
-    button.disabled = false;
-  }
-});
-
 $('logout').addEventListener('click', async () => {
   $('logout').disabled = true;
   try {
     await api('/api/logout', {});
     setSignedIn(false);
     $('status').textContent = 'Logged out. Unsaved inputs and drafts have been cleared.';
-    $('owner-key').focus();
   } catch (error) {
     $('status').textContent = `Logout was not confirmed. ${error.message}`;
   } finally {
@@ -145,6 +125,7 @@ $('analysis-form').addEventListener('submit', async event => {
     if (!signedIn || controller.signal.aborted) return;
     renderComparison(result);
     $('status').textContent = 'Comparison ready. Review the evidence and edit the draft below.';
+    $('comparison').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (error) {
     if (error.name !== 'AbortError') $('status').textContent = error.message;
   } finally {
@@ -160,11 +141,14 @@ const usd = cents => new Intl.NumberFormat('en-US', { style: 'currency', currenc
 async function refreshProposals() {
   const proposals = await api('/api/proposals');
   if (!signedIn) return;
+  $('total-count').textContent = String(proposals.length);
+  $('paid-count').textContent = String(proposals.filter(p => p.status === 'paid').length);
+  $('paid-total').textContent = usd(proposals.filter(p => p.status === 'paid').reduce((total, p) => total + p.amountCents, 0));
   $('proposals').replaceChildren();
   if (!proposals.length) addText($('proposals'), 'p', 'No published proposals yet.');
   for (const proposal of proposals) {
     const card = document.createElement('article');
-    card.className = 'item';
+    card.className = 'item proposal-row';
     addText(card, 'h3', proposal.title);
     addText(card, 'p', `${usd(proposal.amountCents)} USD · ${proposal.status}`);
     if (proposal.captureId) addText(card, 'p', `PayPal transaction: ${proposal.captureId}`);
@@ -243,6 +227,7 @@ $('draft-form').addEventListener('submit', async event => {
     $('draft').hidden = true;
     $('status').textContent = `Published “${proposal.title}” with fixed terms. Copy its client link below.`;
     await refreshProposals();
+    $('published').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (error) {
     $('status').textContent = error.message;
   } finally {
@@ -250,6 +235,6 @@ $('draft-form').addEventListener('submit', async event => {
   }
 });
 
-api('/api/session').then(() => setSignedIn(true)).catch(error => {
+api('/api/session').then(result => { $('account-name').textContent = result.user.name; setSignedIn(true); }).catch(error => {
   $('status').textContent = error.message;
 });

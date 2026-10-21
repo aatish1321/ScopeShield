@@ -66,3 +66,23 @@ test('deletion persists, hides the link, and retains payment records and fixed t
   assert.equal(retained.work, 'Ten products');
   db.close();
 });
+
+test('accounts and ownership persist; only explicit local assignment links legacy records', t => {
+  const directory = mkdtempSync(join(tmpdir(), 'scopeshield-accounts-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const path = join(directory, 'accounts.sqlite');
+  const first = openStore(path);
+  const legacy = first.create({ title: 'Preserve me', work: 'Terms', delivery: 'Later', amountCents: 100 });
+  const user = first.createUser({ name: 'Test', email: 'test@example.test', passwordHash: 'synthetic hash' });
+  assert.equal(first.list(user.id).length, 0);
+  first.close();
+  const second = openStore(path);
+  assert.equal(second.userByEmail('test@example.test').id, user.id);
+  assert.equal(second.get(legacy.token).owner_id, null);
+  assert.throws(() => second.assignLegacy('nonexistent-user'), /FOREIGN KEY/);
+  assert.equal(second.assignLegacy(user.id), 1);
+  assert.equal(second.list(user.id).length, 1);
+  assert.equal(second.list().length, 0);
+  assert.equal(second.get(legacy.token).amount_cents, 100);
+  second.close();
+});

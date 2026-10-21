@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadConfig, requiredText, parseAmount, validateProposal } from '../src/validation.js';
 
-const env = { GROQ_API_KEY: 'test-provider-key', OWNER_ACCESS_KEY: 'test-owner-key-of-at-least-32-characters' };
+const env = { GROQ_API_KEY: 'test-provider-key' };
 
 test('configuration defaults to loopback and Groq strict-output model', () => {
   const config = loadConfig(env);
@@ -13,9 +13,7 @@ test('configuration defaults to loopback and Groq strict-output model', () => {
 
 test('missing or weak credentials fail closed without echoing values', () => {
   assert.throws(() => loadConfig({}), /GROQ_API_KEY/);
-  for (const ownerKey of ['', 'short', ' '.repeat(64)]) {
-    assert.throws(() => loadConfig({ ...env, OWNER_ACCESS_KEY: ownerKey }), /OWNER_ACCESS_KEY/);
-  }
+  assert.throws(() => loadConfig({ GROQ_API_KEY: '   ' }), /GROQ_API_KEY/);
 });
 
 test('only configured origins and safe local HTTP are allowed', () => {

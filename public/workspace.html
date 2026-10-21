@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ScopeShield — Workspace</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/owner.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="ScopeShield home"><img class="brand-logo" src="/assets/scopeshield-logo.png" alt="" width="44" height="48"><span>ScopeShield<span class="brand-dot">.</span></span></a>
+    <nav class="workspace-nav" aria-label="Workspace"><a href="#analysis-form">New scope analysis</a><a href="#draft">Proposal editor</a><a href="#published">Published proposals</a></nav>
+    <div class="account"><span class="badge">Sandbox</span><span id="account-name"></span><button id="logout" class="secondary" type="button">Log out</button></div>
+  </header>
+  <main>
+    <p class="eyebrow">WORKSPACE / SCOPE ANALYSIS</p>
+    <div class="page-heading"><div><h1>Keep your work in scope.</h1><p>Clear agreements. Fair changes. Fewer awkward conversations.</p></div></div>
+    <p id="status" role="status" aria-live="polite"></p>
+    <p class="sandbox-note">Hackathon sandbox: checkout uses this demo’s configured PayPal merchant. No real funds move.</p>
+    <div id="workspace" hidden>
+      <section class="analysis-section" aria-labelledby="compare-title">
+        <div class="section-heading"><div><p class="eyebrow">01 / UNDERSTAND THE CHANGE</p><h2 id="compare-title">Compare the request</h2></div></div>
+        <p>AI is advisory. Review its reasoning before proposing extra work. Submitted text is sent to Groq; use synthetic examples while testing.</p>
+        <button type="button" id="example">Load website example</button>
+        <form id="analysis-form">
+          <div class="split"><div class="input-panel"><span class="eyebrow">THE BASELINE</span><label for="agreement">Original agreement</label>
+          <textarea id="agreement" rows="6" required maxlength="20000" placeholder="Paste the work and terms originally agreed with your client."></textarea>
+          </div><div class="input-panel request-panel"><span class="eyebrow">THE CHANGE</span><label for="request">New client request</label>
+          <textarea id="request" rows="6" required maxlength="20000" placeholder="Paste what the client is asking to add or change."></textarea>
+          </div></div><div class="form-actions"><p>Evidence first. You make the final call.</p><button id="analyze" type="submit">Analyze request →</button></div>
+        </form>
+      </section>
+      <section id="comparison" aria-labelledby="comparison-title" hidden>
+        <p class="eyebrow">AI COMPARISON / REVIEW THE EVIDENCE</p><h2 id="comparison-title">What changed?</h2>
+        <p id="classification" class="badge warning"></p>
+        <p id="summary" class="insight"></p>
+        <div id="items"></div>
+      </section>
+      <section id="draft" aria-labelledby="draft-title" hidden>
+        <p class="eyebrow">02 / DEFINE THE EXTRA WORK</p><h2 id="draft-title">Your proposal, your terms.</h2>
+        <p id="review-warning">You decide what is extra, what it costs, and when it will be delivered.</p>
+        <form id="draft-form">
+          <label for="title">Proposal title</label>
+          <input id="title" maxlength="160" required>
+          <label for="work">Additional work</label>
+          <textarea id="work" rows="5" maxlength="10000" required></textarea>
+          <label for="amount">Price (USD)</label>
+          <input id="amount" type="text" inputmode="decimal" maxlength="12" placeholder="250.00" aria-describedby="amount-help" required>
+          <small id="amount-help">Enter your price in US dollars. No currency conversion.</small>
+          <label for="delivery">Delivery change</label>
+          <textarea id="delivery" rows="2" maxlength="1000" placeholder="For example, three additional working days." required></textarea>
+          <label class="check"><input id="reviewed" type="checkbox" required> I have reviewed the work, price, and delivery change and approve these terms.</label>
+          <p class="notice">Published terms are fixed. Anyone with the client link can view them. Correct mistakes by publishing a new proposal.</p>
+          <button id="publish" type="submit">Approve and publish proposal</button>
+        </form>
+      </section>
+      <section id="published" aria-labelledby="published-title">
+        <p class="eyebrow">03 / SHARE & FOLLOW THROUGH</p><h2 id="published-title">Published proposals</h2><div class="stats"><div><span>Published</span><strong id="total-count">0</strong></div><div><span>Confirmed paid</span><strong id="paid-count">0</strong></div><div><span>Paid in sandbox</span><strong id="paid-total">$0.00</strong></div></div>
+        <button id="refresh-proposals" type="button">Refresh proposals</button>
+        <div id="proposals"></div>
+      </section>
+      <p class="notice">Unsaved agreement text, analysis, and draft edits are held in this page’s memory only. Reloading or logging out clears them.</p>
+    </div>
+  </main>
+  <footer>ScopeShield · Clear scope. Confident work. <a href="/">Back to home</a></footer>
+</body>
+</html>

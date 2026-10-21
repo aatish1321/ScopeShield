@@ -1,7 +1,8 @@
 import express from 'express';
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
+import { credentials, hashPassword, verifyPassword, publicUser } from './auth.js';
 import { compareRequest } from './analysis.js';
 import { AppError, loadConfig, validateProposal } from './validation.js';
 import { openStore, publicProposal, validToken } from './store.js';
@@ -15,7 +16,6 @@ export function createApp(config, { fetchApi = fetch, now = Date.now, store = op
   const app = express();
   const sessions = new Map();
   const limits = new Map();
-  const ownerHash = hash(config.ownerKey);
   const secure = config.appUrl.protocol === 'https:';
   const cookieName = secure ? '__Host-scopeshield' : 'scopeshield';
   const cookieOptions = { httpOnly: true, sameSite: 'strict', secure, path: '/' };
@@ -51,13 +51,15 @@ export function createApp(config, { fetchApi = fetch, now = Date.now, store = op
       .find(value => value.startsWith(`${cookieName}=`))?.slice(cookieName.length + 1);
     return token && /^[a-f0-9]{64}$/.test(token) ? hash(token).toString('hex') : null;
   };
-  const requireOwner = (req, res, next) => {
+  const requireUser = (req, res, next) => {
     const key = sessionKey(req);
-    const expires = key && sessions.get(key);
-    if (!expires || expires <= now()) {
+    const session = key && sessions.get(key);
+    const user = session && session.expires > now() && store.userById(session.userId);
+    if (!user) {
       if (key) sessions.delete(key);
       return next(new AppError(401, 'Please log in to the freelancer workspace.'));
     }
+    req.user = user;
     next();
   };
   const throttle = (category, count, duration) => (req, res, next) => {
@@ -74,40 +76,52 @@ export function createApp(config, { fetchApi = fetch, now = Date.now, store = op
     next();
   };
 
-  app.post('/api/login', throttle('login', 10, 15 * 60 * 1000), (req, res, next) => {
-    const key = req.body?.key;
-    if (typeof key !== 'string' || key.length > 512 || !timingSafeEqual(hash(key), ownerHash)) {
-      return next(new AppError(401, 'Invalid owner access key.'));
-    }
-    for (const [id, expires] of sessions) if (expires <= now()) sessions.delete(id);
+  function signIn(req, res, user, status = 200) {
+    for (const [id, session] of sessions) if (session.expires <= now()) sessions.delete(id);
     const previous = sessionKey(req);
     if (previous) sessions.delete(previous);
-    if (sessions.size >= 1024) return next(new AppError(429, 'Too many sessions. Try again later.'));
+    if (sessions.size >= 1024) throw new AppError(429, 'Too many sessions. Try again later.');
     const token = randomBytes(32).toString('hex');
-    sessions.set(hash(token).toString('hex'), now() + sessionDuration);
-    res.cookie(cookieName, token, { ...cookieOptions, maxAge: sessionDuration }).json({ ok: true });
+    sessions.set(hash(token).toString('hex'), { userId: user.id, expires: now() + sessionDuration });
+    res.status(status).cookie(cookieName, token, { ...cookieOptions, maxAge: sessionDuration }).json({ user: publicUser(user) });
+  }
+  app.post('/api/signup', throttle('signup', 5, 60 * 60 * 1000), async (req, res) => {
+    const input = credentials(req.body, true);
+    const passwordHash = await hashPassword(input.password);
+    // Recheck after hashing so concurrent registrations cannot race the unique constraint.
+    if (store.userByEmail(input.email)) throw new AppError(409, 'Unable to create this account. Try logging in or use another email.');
+    const user = store.createUser({ ...input, passwordHash });
+    signIn(req, res, user, 201);
   });
-  app.get('/api/session', requireOwner, (req, res) => res.json({ ok: true }));
+  app.post('/api/login', throttle('login', 10, 15 * 60 * 1000), async (req, res) => {
+    const input = credentials(req.body);
+    const user = store.userByEmail(input.email);
+    if (!await verifyPassword(input.password, user?.password_hash)) throw new AppError(401, 'Email or password is incorrect.');
+    signIn(req, res, user);
+  });
+  app.get('/api/session', requireUser, (req, res) => res.json({ user: publicUser(req.user), checkoutAvailable: payments.configured }));
   app.post('/api/logout', (req, res) => {
     const key = sessionKey(req);
     if (key) sessions.delete(key);
     res.clearCookie(cookieName, cookieOptions).json({ ok: true });
   });
-  app.post('/api/analyze', requireOwner, throttle('analysis', 30, 60 * 60 * 1000), async (req, res) => {
+  app.post('/api/analyze', requireUser, throttle('analysis', 30, 60 * 60 * 1000), async (req, res) => {
     const result = await compareRequest(req.body || {}, config, fetchApi);
     // An expired/revoked session must not release a comparison after a long provider call.
-    if ((sessions.get(sessionKey(req)) || 0) <= now()) throw new AppError(401, 'Session ended. Please log in again.');
+    if ((sessions.get(sessionKey(req))?.expires || 0) <= now()) throw new AppError(401, 'Session ended. Please log in again.');
     res.json(result);
   });
 
-  app.get('/api/proposals', requireOwner, (req, res) => {
-    res.json(store.list().map(row => ({ ...publicProposal(row), token: row.token })));
+  app.get('/api/proposals', requireUser, (req, res) => {
+    res.json(store.list(req.user.id).map(row => ({ ...publicProposal(row), token: row.token })));
   });
-  app.post('/api/proposals', requireOwner, throttle('publish', 30, 60 * 60 * 1000), (req, res) => {
-    const row = store.create(validateProposal(req.body));
+  app.post('/api/proposals', requireUser, throttle('publish', 30, 60 * 60 * 1000), (req, res) => {
+    const row = store.create(validateProposal(req.body), req.user.id);
     res.status(201).json({ ...publicProposal(row), token: row.token });
   });
-  app.post('/api/proposals/:token/delete', requireOwner, (req, res) => {
+  app.post('/api/proposals/:token/delete', requireUser, (req, res) => {
+    const row = store.get(req.params.token);
+    if (!row || row.owner_id !== req.user.id) throw new AppError(404, 'Proposal unavailable.');
     payments.remove(req.params.token);
     res.json({ ok: true });
   });
@@ -132,6 +146,13 @@ export function createApp(config, { fetchApi = fetch, now = Date.now, store = op
     }
     res.sendFile('proposal.html', { root: publicDirectory });
   });
+
+  app.get('/app', (req, res, next) => {
+    const session = sessions.get(sessionKey(req));
+    if (!session || session.expires <= now()) return res.redirect('/login');
+    res.sendFile('workspace.html', { root: publicDirectory });
+  });
+  app.get(['/login', '/signup'], (req, res) => res.sendFile('login.html', { root: publicDirectory }));
 
   app.use(express.static(publicDirectory, { dotfiles: 'deny', index: 'index.html', etag: false, cacheControl: false }));
   app.use((req, res, next) => next(new AppError(404, 'Page or endpoint not found.')));

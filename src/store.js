@@ -31,6 +31,11 @@ export function openStore(path = defaultPath) {
   const db = new DatabaseSync(path);
   db.exec(`
     PRAGMA busy_timeout = 5000;
+    PRAGMA foreign_keys = ON;
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL, created_at TEXT NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS proposals (
       id TEXT PRIMARY KEY,
       token TEXT NOT NULL UNIQUE,
@@ -61,18 +66,35 @@ export function openStore(path = defaultPath) {
   if (!db.prepare('PRAGMA table_info(proposals)').all().some(column => column.name === 'deleted_at')) {
     db.exec('ALTER TABLE proposals ADD COLUMN deleted_at TEXT');
   }
+  if (!db.prepare('PRAGMA table_info(proposals)').all().some(column => column.name === 'owner_id')) {
+    db.exec('ALTER TABLE proposals ADD COLUMN owner_id TEXT REFERENCES users(id)');
+  }
+  db.exec(`CREATE INDEX IF NOT EXISTS proposals_owner ON proposals(owner_id);
+    CREATE TRIGGER IF NOT EXISTS fixed_proposal_owner BEFORE UPDATE OF owner_id ON proposals
+    WHEN OLD.owner_id IS NOT NULL BEGIN SELECT RAISE(ABORT, 'Proposal owner cannot be changed'); END;`);
   const paymentFields = new Set(['payment_status', 'accepted_at', 'order_id', 'approval_url', 'create_request_id',
     'create_started_at', 'capture_request_id', 'capture_started_at', 'capture_id', 'paid_at', 'merchant_id']);
   const get = db.prepare('SELECT * FROM proposals WHERE token = ? AND deleted_at IS NULL');
   return {
-    create({ title, work, delivery, amountCents }) {
+    create({ title, work, delivery, amountCents }, ownerId = null) {
       const token = randomBytes(32).toString('hex');
-      db.prepare('INSERT INTO proposals (id, token, title, work, delivery, amount_cents, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
-        .run(randomUUID(), token, title, work, delivery, amountCents, new Date().toISOString());
+      db.prepare('INSERT INTO proposals (id, token, title, work, delivery, amount_cents, created_at, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(randomUUID(), token, title, work, delivery, amountCents, new Date().toISOString(), ownerId);
       return get.get(token);
     },
     get(token) { return validToken(token) ? get.get(token) : undefined; },
-    list() { return db.prepare('SELECT * FROM proposals WHERE deleted_at IS NULL ORDER BY created_at DESC, rowid DESC').all(); },
+    list(ownerId = null) { return db.prepare('SELECT * FROM proposals WHERE owner_id IS ? AND deleted_at IS NULL ORDER BY created_at DESC, rowid DESC').all(ownerId); },
+    userByEmail(email) { return db.prepare('SELECT * FROM users WHERE email = ?').get(email); },
+    userById(id) { return db.prepare('SELECT * FROM users WHERE id = ?').get(id); },
+    createUser({ name, email, passwordHash }) {
+      const id = randomUUID();
+      db.prepare('INSERT INTO users (id, name, email, password_hash, created_at) VALUES (?, ?, ?, ?, ?)')
+        .run(id, name, email, passwordHash, new Date().toISOString());
+      return this.userById(id);
+    },
+    assignLegacy(userId) {
+      return db.prepare('UPDATE proposals SET owner_id = ? WHERE owner_id IS NULL').run(userId).changes;
+    },
     remove(token) {
       db.prepare('UPDATE proposals SET deleted_at = ? WHERE token = ? AND deleted_at IS NULL')
         .run(new Date().toISOString(), token);

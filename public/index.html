@@ -1,75 +1,13 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ScopeShield — Freelancer workspace</title>
-  <link rel="stylesheet" href="/styles.css">
-  <script src="/owner.js" defer></script>
-</head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Compare client requests with your agreement using AI, publish clear proposals, and collect payment through PayPal sandbox."><title>ScopeShield — Keep your work in scope</title><link rel="stylesheet" href="/styles.css"></head>
 <body>
-  <main>
-    <header>
-      <div class="brand">
-        <img class="brand-logo" src="/assets/scopeshield-logo.png" alt="" width="72" height="88">
-        <div><h1>ScopeShield</h1><p>Turn extra requests into clear agreements.</p></div>
-      </div>
-      <button id="logout" type="button" hidden>Log out</button>
-    </header>
-    <p id="status" role="status" aria-live="polite"></p>
-    <section id="login-panel" aria-labelledby="login-title">
-      <h2 id="login-title">Freelancer login</h2>
-      <p>Use the owner access key configured on your server.</p>
-      <form id="login-form">
-        <label for="owner-key">Owner access key</label>
-        <input id="owner-key" type="password" autocomplete="current-password" required maxlength="512">
-        <button type="submit">Log in</button>
-      </form>
-    </section>
-    <div id="workspace" hidden>
-      <section aria-labelledby="compare-title">
-        <h2 id="compare-title">1. Compare the request</h2>
-        <p>AI is advisory. Review its reasoning before proposing extra work. Submitted text is sent to Groq; use synthetic examples while testing.</p>
-        <button type="button" id="example">Load website example</button>
-        <form id="analysis-form">
-          <label for="agreement">Original agreement</label>
-          <textarea id="agreement" rows="6" required maxlength="20000" placeholder="Paste the work and terms originally agreed with your client."></textarea>
-          <label for="request">New client request</label>
-          <textarea id="request" rows="4" required maxlength="20000" placeholder="Paste what the client is asking to add or change."></textarea>
-          <button id="analyze" type="submit">Analyze request</button>
-        </form>
-      </section>
-      <section id="comparison" aria-labelledby="comparison-title" hidden>
-        <h2 id="comparison-title">Comparison</h2>
-        <p id="classification"></p>
-        <p id="summary"></p>
-        <div id="items"></div>
-      </section>
-      <section id="draft" aria-labelledby="draft-title" hidden>
-        <h2 id="draft-title">2. Review your draft</h2>
-        <p id="review-warning">You decide what is extra, what it costs, and when it will be delivered.</p>
-        <form id="draft-form">
-          <label for="title">Proposal title</label>
-          <input id="title" maxlength="160" required>
-          <label for="work">Additional work</label>
-          <textarea id="work" rows="5" maxlength="10000" required></textarea>
-          <label for="amount">Price (USD)</label>
-          <input id="amount" type="text" inputmode="decimal" maxlength="12" placeholder="250.00" aria-describedby="amount-help" required>
-          <small id="amount-help">Enter your price in US dollars. No currency conversion.</small>
-          <label for="delivery">Delivery change</label>
-          <textarea id="delivery" rows="2" maxlength="1000" placeholder="For example, three additional working days." required></textarea>
-          <label class="check"><input id="reviewed" type="checkbox" required> I have reviewed the work, price, and delivery change and approve these terms.</label>
-          <p class="notice">Published terms are fixed. Anyone with the client link can view them. Correct mistakes by publishing a new proposal.</p>
-          <button id="publish" type="submit">Approve and publish proposal</button>
-        </form>
-      </section>
-      <section aria-labelledby="published-title">
-        <h2 id="published-title">Published proposals</h2>
-        <button id="refresh-proposals" type="button">Refresh proposals</button>
-        <div id="proposals"></div>
-      </section>
-      <p class="notice">Unsaved agreement text, analysis, and draft edits are held in this page’s memory only. Reloading or logging out clears them.</p>
-    </div>
-  </main>
-</body>
-</html>
+<header class="topbar"><a class="brand" href="/" aria-label="ScopeShield home"><img class="brand-logo" src="/assets/scopeshield-logo.png" alt="" width="44" height="48"><span>ScopeShield<span class="brand-dot">.</span></span></a><nav aria-label="Main navigation"><a href="#features">Features</a><a href="#how-it-works">How it works</a><a href="https://github.com/aatish1321/ScopeShield">Source code</a></nav><div class="account"><a href="/login">Log in</a><a class="button" href="/signup">Get started →</a></div></header>
+<main class="landing">
+  <div class="hero"><div><span class="badge">BUILT WITH PAYPAL + AI</span><h1>“Just one more thing”<br>deserves a <em>clear agreement.</em></h1><p class="lead">Protect your time without the awkward conversation. Turn extra client requests into reviewed proposals, clear prices, and PayPal payments.</p><div class="hero-actions"><a class="button" href="/signup">Start your first scope analysis →</a><a href="#how-it-works">See how it works ↗</a></div><p class="notice">Working hackathon prototype · PayPal sandbox only</p></div>
+  <div class="preview" aria-label="Illustrative example of the proposal workflow"><div class="preview-top"><span class="brand-dot">●</span> A LITTLE CLARITY GOES A LONG WAY <span class="badge">Example</span></div><div class="preview-body"><p class="eyebrow">THE ORIGINAL AGREEMENT</p><p>A three-page website. One revision round.</p><div class="request-bubble">“Can you also add an online store?”</div><span class="badge warning">Potential additional work</span><h3>Make the change explicit.</h3><p>Review source evidence. Decide the scope, price, and delivery change.</p><div class="preview-payment"><div><small>ADDITIONAL WORK PROPOSAL</small><strong>Ten-product store</strong></div><span>→</span></div><p class="notice">Illustrative flow. Run an analysis for a real AI result.</p></div></div></div>
+  <section id="features" class="landing-section"><p class="eyebrow">FROM A REQUEST TO AN AGREEMENT</p><h2>Less guesswork. More clarity.</h2><div class="feature-grid"><article><span class="feature-number">01</span><h3>Compare with AI</h3><p>Groq compares the request with your agreement and returns source excerpts. Additional, included, or unclear—you review the reasoning.</p></article><article><span class="feature-number">02</span><h3>Stay in control</h3><p>Edit the work, price, and delivery change. Nothing is published until you explicitly approve the terms.</p></article><article><span class="feature-number">03</span><h3>Get agreement and payment</h3><p>Share a client link. Your client accepts the fixed proposal and pays through PayPal sandbox, without a ScopeShield account.</p></article></div></section>
+  <section id="how-it-works" class="landing-section how"><div><p class="eyebrow">A WORKFLOW YOU CAN ACTUALLY TRY</p><h2>From “can you also…”<br>to a clear next step.</h2><a class="button" href="/signup">Try the working demo →</a></div><ol><li><strong>Bring the agreement and request.</strong><p>Create your workspace and load our synthetic website example, or paste your own text.</p></li><li><strong>Review the comparison and proposal.</strong><p>Check the AI’s evidence. Set your own USD price and delivery terms, then publish.</p></li><li><strong>Share, accept, and pay.</strong><p>Open the client link, accept the terms, and use a PayPal sandbox buyer. Payment is confirmed by the server.</p></li></ol></section>
+  <div class="privacy-note"><strong>Your workspace stays yours.</strong><p>Accounts and published proposals are stored on the server. No browser storage. Submitted text goes to Groq for analysis; use synthetic data for the demo. Anyone with a client link can view that proposal.</p></div>
+</main><footer><a class="brand" href="/">ScopeShield.</a><span>Clear scope. Confident work.</span><a href="https://github.com/aatish1321/ScopeShield">Open source · MIT</a><span>Sandbox payments · No real funds</span></footer>
+</body></html>
