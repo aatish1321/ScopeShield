@@ -9,8 +9,11 @@ import { request as httpRequest } from 'node:http';
 import { createApp } from '../src/server.js';
 import { loadConfig } from '../src/validation.js';
 import { openStore } from '../src/store.js';
+import { hashPassword } from '../src/auth.js';
 
-const ownerKey = 'synthetic-owner-test-key-at-least-32-characters';
+const password = 'synthetic test passphrase for accounts';
+const account = { email: 'owner@example.test', password };
+const passwordHash = await hashPassword(password);
 const input = { agreement: 'Build three pages.', newRequest: 'Add a store.' };
 const result = {
   classification: 'additional', summary: '<img src=x onerror=alert(1)>',
@@ -19,10 +22,11 @@ const result = {
 const reply = () => new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(result) } }] }));
 
 async function start(t, options = {}) {
-  const config = loadConfig({ GROQ_API_KEY: 'server-private-test-key', OWNER_ACCESS_KEY: ownerKey,
+  const config = loadConfig({ GROQ_API_KEY: 'server-private-test-key',
     APP_URL: options.secure ? 'https://127.0.0.1' : 'http://127.0.0.1',
     ...(options.payments ? { PAYPAL_CLIENT_ID: 'test-client', PAYPAL_CLIENT_SECRET: 'test-paypal-secret' } : {}) });
   const store = options.store || openStore(':memory:');
+  if (!store.userByEmail(account.email)) store.createUser({ name: 'Test Freelancer', email: account.email, passwordHash });
   const server = createApp(config, { store, fetchApi: options.fetchApi || (async () => reply()), now: options.now || Date.now }).listen(0, '127.0.0.1');
   await once(server, 'listening');
   config.appUrl.port = String(server.address().port);
@@ -39,18 +43,18 @@ async function start(t, options = {}) {
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const login = async () => {
-    const response = await request('/api/login', { key: ownerKey });
+    const response = await request('/api/login', account);
     assert.equal(response.status, 200);
     return response.headers.get('set-cookie').split(';')[0];
   };
-  return { request, login, base, config };
+  return { request, login, base, config, store };
 }
 
 test('anonymous APIs fail closed; valid login grants analysis; logout revokes session', async t => {
   const { request, login } = await start(t);
   assert.equal((await request('/api/session')).status, 401);
   assert.equal((await request('/api/analyze', input)).status, 401);
-  assert.equal((await request('/api/login', { key: 'wrong' })).status, 401);
+  assert.equal((await request('/api/login', { ...account, password: 'wrong test passphrase' })).status, 401);
   const cookie = await login();
   assert.equal((await request('/api/session', undefined, { cookie })).status, 200);
   const analyzed = await request('/api/analyze', input, { cookie });
@@ -66,12 +70,12 @@ test('cookie flags, login token rotation and session expiry', async t => {
   let time = 1000;
   const { request, login } = await start(t, { now: () => time });
   const first = await login();
-  const response = await request('/api/login', { key: ownerKey }, { cookie: first });
+  const response = await request('/api/login', account, { cookie: first });
   const rawCookie = response.headers.get('set-cookie');
   assert.match(rawCookie, /HttpOnly/);
   assert.match(rawCookie, /SameSite=Strict/);
   assert.match(rawCookie, /Path=\//);
-  assert.ok(!rawCookie.includes(ownerKey));
+  assert.ok(!rawCookie.includes(password));
   const second = rawCookie.split(';')[0];
   assert.notEqual(first, second);
   assert.equal((await request('/api/session', undefined, { cookie: first })).status, 401);
@@ -81,7 +85,7 @@ test('cookie flags, login token rotation and session expiry', async t => {
 
 test('HTTPS configuration sets Secure and host-scoped cookie', async t => {
   const { request } = await start(t, { secure: true });
-  const response = await request('/api/login', { key: ownerKey });
+  const response = await request('/api/login', account);
   assert.match(response.headers.get('set-cookie'), /^__Host-scopeshield=/);
   assert.match(response.headers.get('set-cookie'), /; Secure/);
   assert.equal(response.headers.get('strict-transport-security'), 'max-age=31536000');
@@ -89,7 +93,7 @@ test('HTTPS configuration sets Secure and host-scoped cookie', async t => {
 
 test('same-origin JSON is required even for login/logout; host spoofing fails', async t => {
   const { request, base } = await start(t);
-  for (const path of ['/api/login', '/api/logout', '/api/analyze', '/api/proposals/test/checkout', '/api/proposals/test/capture', '/api/proposals/test/status', '/api/proposals/test/delete']) {
+  for (const path of ['/api/signup', '/api/login', '/api/logout', '/api/analyze', '/api/proposals/test/checkout', '/api/proposals/test/capture', '/api/proposals/test/status', '/api/proposals/test/delete']) {
     for (const origin of ['', 'null', 'https://attacker.example']) {
       assert.equal((await request(path, {}, { headers: { Origin: origin } })).status, 403);
     }
@@ -106,7 +110,7 @@ test('same-origin JSON is required even for login/logout; host spoofing fails', 
     request.end();
   });
   assert.equal(forgedStatus, 400);
-  assert.equal((await request('/api/login', { key: ownerKey }, { headers: { 'X-Forwarded-Host': 'attacker.example' } })).status, 200);
+  assert.equal((await request('/api/login', account, { headers: { 'X-Forwarded-Host': 'attacker.example' } })).status, 200);
 });
 
 test('headers and static allowlist protect environment, plans, database, source and Git', async t => {
@@ -130,8 +134,8 @@ test('headers and static allowlist protect environment, plans, database, source 
 test('login and analysis throttles limit expensive or credential-guessing requests', async t => {
   const { request, login } = await start(t);
   const cookie = await login();
-  for (let i = 0; i < 9; i++) assert.equal((await request('/api/login', { key: 'wrong' })).status, 401);
-  const limited = await request('/api/login', { key: ownerKey });
+  for (let i = 0; i < 9; i++) assert.equal((await request('/api/login', { ...account, password: 'wrong test passphrase' })).status, 401);
+  const limited = await request('/api/login', account);
   assert.equal(limited.status, 429);
   assert.ok(Number(limited.headers.get('retry-after')) > 0);
   for (let i = 0; i < 30; i++) assert.equal((await request('/api/analyze', input, { cookie })).status, 200);
@@ -154,7 +158,7 @@ test('provider failures do not leak secrets or upstream error payloads', async t
   assert.equal(response.status, 502);
   const text = await response.text();
   assert.ok(!text.includes('sensitive upstream data'));
-  assert.ok(!text.includes(ownerKey));
+  assert.ok(!text.includes(password));
   assert.ok(!text.includes('server-private-test-key'));
 });
 
@@ -179,7 +183,7 @@ test('server restart invalidates sessions', async t => {
   assert.equal((await second.request('/api/session', undefined, { cookie })).status, 401);
 });
 
-test('only owner can publish/list; client sees immutable approved fields', async t => {
+test('only a signed-in freelancer can publish/list; client sees immutable approved fields', async t => {
   const { request, login } = await start(t);
   const terms = { title: '<script>Store</script>', work: 'Add a store', delivery: 'Five extra days', amount: '250.00', reviewed: true,
     agreement: 'private agreement text', analysis: 'internal reasoning', amountCents: 1, currency: 'EUR' };
@@ -232,7 +236,7 @@ test('published client link survives app/store reopen and owner logout', async t
   });
 });
 
-test('only owner can delete; deleted proposals disappear and client/payment links stop working', async t => {
+test('only the proposal owner can delete; deleted proposals disappear and client/payment links stop working', async t => {
   let externalCalls = 0;
   const { request, login } = await start(t, { payments: true, fetchApi: async () => { externalCalls++; throw new Error('Unexpected provider call'); } });
   const cookie = await login();
@@ -290,7 +294,7 @@ test('HTTP payment journey ignores browser amounts/order IDs and records payment
 });
 
 test('browser code uses safe text sinks and no persistent credential/data storage', async () => {
-  for (const [script, page] of [['owner.js', 'index.html'], ['proposal.js', 'proposal.html']]) {
+  for (const [script, page] of [['owner.js', 'workspace.html'], ['proposal.js', 'proposal.html'], ['auth.js', 'login.html']]) {
     const source = await readFile(new URL(`../public/${script}`, import.meta.url), 'utf8');
     assert.doesNotMatch(source, /localStorage|sessionStorage|innerHTML|outerHTML|insertAdjacentHTML|document\.write/);
     assert.doesNotMatch(source, /GROQ_API_KEY|PAYPAL_CLIENT_SECRET|OWNER_ACCESS_KEY/);
@@ -298,4 +302,41 @@ test('browser code uses safe text sinks and no persistent credential/data storag
     const requiredIds = [...source.matchAll(/\$\('([^']+)'\)/g)].map(match => match[1]);
     for (const id of requiredIds) assert.ok(html.includes(`id="${id}"`), `Missing UI element: ${id}`);
   }
+});
+
+test('signup creates a private account; another account cannot list/delete its proposals or claim legacy data', async t => {
+  const { request, login, store } = await start(t);
+  const legacy = store.create({ title: 'Old proposal', work: 'Preserved', delivery: 'Later', amountCents: 100 });
+  const firstCookie = await login();
+  const created = await request('/api/proposals', { reviewed: true, title: 'Private workspace', work: 'Extra work', amount: '250', delivery: 'Five days', ownerId: 'forged' }, { cookie: firstCookie });
+  const proposal = await created.json();
+  const signup = await request('/api/signup', { email: ' New@Example.test ', name: 'New Freelancer', password });
+  assert.equal(signup.status, 201);
+  assert.deepEqual(await signup.json(), { user: { email: 'new@example.test', name: 'New Freelancer' } });
+  const secondCookie = signup.headers.get('set-cookie').split(';')[0];
+  assert.deepEqual(await (await request('/api/proposals', undefined, { cookie: secondCookie })).json(), []);
+  assert.equal((await request(`/api/proposals/${proposal.token}/delete`, {}, { cookie: secondCookie })).status, 404);
+  assert.equal((await request(`/api/proposals/${legacy.token}/delete`, {}, { cookie: secondCookie })).status, 404);
+  assert.equal((await request(`/api/proposals/${proposal.token}`)).status, 200);
+  assert.equal((await request(`/api/proposals/${legacy.token}`)).status, 200);
+  assert.equal((await request('/api/signup', { email: 'NEW@example.test', name: 'Duplicate', password })).status, 409);
+  const user = store.userByEmail('new@example.test');
+  assert.ok(!user.password_hash.includes(password));
+  assert.equal(store.get(proposal.token).owner_id, store.userByEmail(account.email).id);
+  assert.equal(store.get(legacy.token).owner_id, null);
+  assert.equal((await request('/api/login', { email: 'new@example.test', password })).status, 200);
+  const session = await (await request('/api/session', undefined, { cookie: secondCookie })).json();
+  assert.equal(session.user.email, 'new@example.test');
+  assert.ok(!JSON.stringify(session).includes('password_hash'));
+});
+
+test('landing, auth pages and protected workspace are reachable; signup validates and throttles', async t => {
+  const { request, login } = await start(t);
+  for (const path of ['/', '/login', '/signup']) assert.equal((await request(path)).status, 200);
+  const protectedPage = await request('/app', undefined, { redirect: 'manual' });
+  assert.equal(protectedPage.status, 302);
+  assert.equal(protectedPage.headers.get('location'), '/login');
+  assert.equal((await request('/app', undefined, { cookie: await login() })).status, 200);
+  for (let index = 0; index < 5; index++) assert.equal((await request('/api/signup', { email: 'invalid', password: 'short' })).status, 400);
+  assert.equal((await request('/api/signup', { name: 'Test', email: 'new@example.test', password })).status, 429);
 });

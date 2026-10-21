@@ -34,9 +34,6 @@ export function validateProposal(body) {
 
 export function loadConfig(env = process.env) {
   if (!env.GROQ_API_KEY?.trim()) throw new Error('Set GROQ_API_KEY in your local .env.');
-  if (!env.OWNER_ACCESS_KEY || env.OWNER_ACCESS_KEY.trim().length < 32 || env.OWNER_ACCESS_KEY.length > 512) {
-    throw new Error('Set OWNER_ACCESS_KEY to a random secret of 32–512 characters in your local .env.');
-  }
   let appUrl;
   try {
     appUrl = new URL(env.APP_URL || 'http://localhost:3000');
@@ -57,7 +54,6 @@ export function loadConfig(env = process.env) {
   return {
     appUrl,
     port,
-    ownerKey: env.OWNER_ACCESS_KEY,
     groqKey: env.GROQ_API_KEY.trim(),
     groqModel: env.GROQ_MODEL?.trim() || 'openai/gpt-oss-20b',
     paypalClientId,
