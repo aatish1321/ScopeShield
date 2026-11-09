@@ -317,6 +317,6 @@ $('draft-form').addEventListener('submit', async event => {
   }
 });
 
-api('/api/session').then(result => { $('account-name').textContent = result.user.name; $('welcome').textContent = `Welcome back, ${result.user.name}.`; setSignedIn(true); }).catch(error => {
+api('/api/session').then(result => { $('account-name').textContent = result.user.name; $('workspace-greeting').textContent = `Welcome back, ${result.user.name}.`; setSignedIn(true); }).catch(error => {
   $('status').textContent = error.message;
 });

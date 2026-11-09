@@ -80,7 +80,7 @@ test('glass presentation covers all screens and respects reduced motion without 
   assert.doesNotMatch(css, /https?:|@import/);
 });
 
-test('Polished light palette keeps body, secondary, placeholder and action text readable', async () => {
+test('Editorial cobalt palette keeps body, secondary, placeholder and action text readable', async () => {
   const css = await readFile(new URL('../public/glass.css', import.meta.url), 'utf8');
   const color = name => {
     const match = css.match(new RegExp(`--${name}:(#[a-f0-9]{6})`));

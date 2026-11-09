@@ -12,15 +12,34 @@
   <link rel="stylesheet" href="/receipt.css">
 </head>
 <body class="glass-theme dashboard-page">
-  <header class="topbar">
-    <a class="brand" href="/" aria-label="ScopeShield home"><img class="brand-logo" src="/assets/scopeshield-logo.png" alt="" width="44" height="48"><span>ScopeShield<span class="brand-dot">.</span></span></a>
-    <nav class="workspace-nav" aria-label="Workspace"><a class="active" href="#overview"><span aria-hidden="true">▦</span> Dashboard</a><a href="#analysis-section"><span aria-hidden="true">＋</span> New analysis</a><a href="#published"><span aria-hidden="true">▤</span> Proposals</a></nav>
-    <div class="account"><span class="badge">Sandbox</span><span id="account-name"></span><button id="logout" class="secondary" type="button">Log out</button></div>
-  </header>
+  <div class="app-shell">
+  <aside class="app-sidebar" aria-label="Workspace sidebar">
+    <a class="brand" href="/" aria-label="ScopeShield home"><img class="brand-logo" src="/assets/scopeshield-logo.png" alt="" width="40" height="44"><span>ScopeShield<span class="brand-dot">.</span></span></a>
+    <a class="button sidebar-create" href="#analysis-section">New scope analysis <span aria-hidden="true">＋</span></a>
+    <p class="sidebar-label">WORKSPACE</p>
+    <nav class="workspace-nav" aria-label="Workspace"><a class="active" href="#overview"><span aria-hidden="true">▦</span> Overview</a><a href="#analysis-section"><span aria-hidden="true">✳</span> Scope comparison</a><a href="#published"><span aria-hidden="true">▤</span> Published proposals</a></nav>
+    <div class="sidebar-explainer"><span class="sidebar-label">THE WORKFLOW</span><p>Compare the request.<br>Agree on the change.<br>Get paid for the extra.</p><a href="/">How ScopeShield works ↗</a></div>
+    <div class="sidebar-bottom"><span class="badge">PayPal sandbox</span><div class="sidebar-user"><span class="user-mark" aria-hidden="true">S</span><div><span id="account-name"></span><small>Freelancer workspace</small></div></div><button id="logout" class="secondary" type="button">Log out ↗</button></div>
+  </aside>
+  <div class="app-content">
+  <header class="topbar app-topbar"><span>Workspace <span class="breadcrumb-divider">/</span> Overview</span><a href="https://github.com/aatish1321/ScopeShield#demo-walkthrough" target="_blank" rel="noopener noreferrer">Setup & demo guide ↗</a></header>
   <main>
-    <div class="page-heading"><div><p class="eyebrow">YOUR FREELANCE WORK, AT A GLANCE</p><h1 id="welcome">Welcome back.</h1><p>A little clarity for every extra request.</p></div><a class="button new-analysis" href="#analysis-section">＋ New scope analysis</a></div>
+    <div class="page-heading"><div><p class="eyebrow">YOUR FREELANCE WORK, AT A GLANCE</p><h1 id="welcome">What changed in your project?</h1><p id="workspace-greeting">Your agreements, change proposals, and payments. One clear workspace.</p></div><a class="button new-analysis" href="#analysis-section">＋ New scope analysis</a></div>
     <p id="status" role="status" aria-live="polite"></p>
-    <div id="workspace" hidden>
+    <div id="workspace" class="workspace-grid" hidden>
+      <div class="workspace-main">
+      <section id="analysis-section" class="analysis-section widget" aria-labelledby="compare-title">
+        <div class="section-heading"><div><p class="eyebrow">START WITH THE AGREEMENT</p><h2 id="compare-title">Compare the agreement.</h2></div></div>
+        <p>AI is advisory. Review its reasoning before proposing extra work. Submitted text is sent to Groq; use synthetic examples while testing.</p>
+        <button type="button" id="example">Load website example</button>
+        <form id="analysis-form">
+          <div class="split"><div class="input-panel"><span class="eyebrow">THE BASELINE</span><label for="agreement">Original agreement</label>
+          <textarea id="agreement" rows="6" required maxlength="20000" placeholder="Paste the work and terms originally agreed with your client."></textarea>
+          </div><div class="input-panel request-panel"><span class="eyebrow">THE CHANGE</span><label for="request">New client request</label>
+          <textarea id="request" rows="6" required maxlength="20000" placeholder="Paste what the client is asking to add or change."></textarea>
+          </div></div><div class="form-actions"><p>AI finds the context. You make the call.</p><button id="analyze" type="submit">Analyze request →</button></div>
+        </form>
+      </section>
       <div id="overview" class="dashboard-overview" aria-label="Proposal dashboard" aria-busy="true">
         <div class="metric-grid">
           <article class="widget metric"><div class="widget-label"><span><span class="widget-icon" aria-hidden="true">▤</span> Published proposals</span><span class="period-label">Current proposals</span></div><strong id="total-count">—</strong><p>Clear terms, ready to share.</p></article>
@@ -29,25 +48,13 @@
         </div>
         <div class="dashboard-grid">
           <section class="widget chart-widget" aria-labelledby="activity-title"><div class="widget-heading"><h2 id="activity-title"><span class="widget-icon" aria-hidden="true">▥</span> Proposal activity</h2><span class="period-label">Last 7 days · UTC</span></div><strong class="chart-total" id="week-total">—</strong><p>Proposals published in the last 7 days</p><div id="activity-chart" class="bar-chart" role="img" aria-label="Proposal activity is loading"></div></section>
-          <section class="widget chart-widget" aria-labelledby="collection-title"><div class="widget-heading"><h2 id="collection-title"><span class="widget-icon" aria-hidden="true">↗</span> Payment collection</h2><span class="period-label">Last 30 days · USD</span></div><strong class="chart-total" id="month-total">—</strong><p>Confirmed sandbox payments</p><svg id="collection-chart" class="collection-chart" viewBox="0 0 400 150" role="img" aria-label="Payment collection is loading" preserveAspectRatio="none"><defs><linearGradient id="collection-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#17616b" stop-opacity=".22"/><stop offset="100%" stop-color="#17616b" stop-opacity="0"/></linearGradient></defs><path id="collection-area" fill="url(#collection-fill)"/><path id="collection-line" fill="none" stroke="#17616b" stroke-width="3" vector-effect="non-scaling-stroke"/></svg><div class="chart-range"><span>30 days ago</span><span>Today</span></div></section>
-          <section class="widget pipeline-widget" aria-labelledby="pipeline-title"><div class="widget-heading"><h2 id="pipeline-title"><span class="widget-icon" aria-hidden="true">◉</span> Your pipeline</h2><a href="#published" aria-label="View published proposals">↗</a></div><div class="pipeline-hero"><strong id="paid-rate">—</strong><span>of published proposals paid</span></div><div id="pipeline" class="pipeline-list"></div><div class="pipeline-note"><span class="live-dot" aria-hidden="true"></span> Saved proposal status<p>Use “Check payment status” for the latest PayPal result.</p></div></section>
+
+
         </div>
       </div>
       <section id="published" class="widget" aria-labelledby="published-title">
         <div class="widget-heading"><div><p class="eyebrow">YOUR WORK, MOVING FORWARD</p><h2 id="published-title">Published proposals</h2></div><button id="refresh-proposals" type="button">↻ Refresh</button></div>
         <div id="proposals"></div>
-      </section>
-      <section id="analysis-section" class="analysis-section widget" aria-labelledby="compare-title">
-        <div class="section-heading"><div><p class="eyebrow">01 / UNDERSTAND THE CHANGE</p><h2 id="compare-title">Compare the request</h2></div></div>
-        <p>AI is advisory. Review its reasoning before proposing extra work. Submitted text is sent to Groq; use synthetic examples while testing.</p>
-        <button type="button" id="example">Load website example</button>
-        <form id="analysis-form">
-          <div class="split"><div class="input-panel"><span class="eyebrow">THE BASELINE</span><label for="agreement">Original agreement</label>
-          <textarea id="agreement" rows="6" required maxlength="20000" placeholder="Paste the work and terms originally agreed with your client."></textarea>
-          </div><div class="input-panel request-panel"><span class="eyebrow">THE CHANGE</span><label for="request">New client request</label>
-          <textarea id="request" rows="6" required maxlength="20000" placeholder="Paste what the client is asking to add or change."></textarea>
-          </div></div><div class="form-actions"><p>Evidence first. You make the final call.</p><button id="analyze" type="submit">Analyze request →</button></div>
-        </form>
       </section>
       <section id="comparison" aria-labelledby="comparison-title" hidden>
         <p class="eyebrow">AI COMPARISON / REVIEW THE EVIDENCE</p><h2 id="comparison-title">What changed?</h2>
@@ -81,10 +88,21 @@
           <button id="publish" type="submit">Approve and publish proposal</button>
         </form>
       </section>
+      </div>
+      <aside class="workspace-rail" aria-label="Proposal and payment overview">
+          <section class="widget pipeline-widget" aria-labelledby="pipeline-title"><div class="widget-heading"><h2 id="pipeline-title"><span class="widget-icon" aria-hidden="true">◉</span> Your pipeline</h2><a href="#published" aria-label="View published proposals">↗</a></div><div class="pipeline-hero"><strong id="paid-rate">—</strong><span>of published proposals paid</span></div><div id="pipeline" class="pipeline-list"></div><div class="pipeline-note"><span class="live-dot" aria-hidden="true"></span> Saved proposal status<p>Use “Check payment status” for the latest PayPal result.</p></div></section>
+          <section class="widget chart-widget" aria-labelledby="collection-title"><div class="widget-heading"><h2 id="collection-title"><span class="widget-icon" aria-hidden="true">↗</span> Payment collection</h2><span class="period-label">Last 30 days · USD</span></div><strong class="chart-total" id="month-total">—</strong><p>Confirmed sandbox payments</p><svg id="collection-chart" class="collection-chart" viewBox="0 0 400 150" role="img" aria-label="Payment collection is loading" preserveAspectRatio="none"><defs><linearGradient id="collection-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#173bd1" stop-opacity=".22"/><stop offset="100%" stop-color="#173bd1" stop-opacity="0"/></linearGradient></defs><path id="collection-area" fill="url(#collection-fill)"/><path id="collection-line" fill="none" stroke="#17616b" stroke-width="3" vector-effect="non-scaling-stroke"/></svg><div class="chart-range"><span>30 days ago</span><span>Today</span></div></section>
+        <section class="widget workflow-widget"><p class="eyebrow">EVERY CHANGE, IN ORDER</p><h2>A clear next step.</h2><ol><li><strong>Compare</strong><span>Review the agreement and the new request.</span></li><li><strong>Agree</strong><span>Publish your reviewed work, fee, and delivery.</span></li><li><strong>Collect</strong><span>Let your client accept and pay through PayPal sandbox.</span></li></ol><p class="notice">Nothing is published or charged without approval.</p></section>
+        <div class="rail-note"><span class="live-dot" aria-hidden="true"></span> Your workspace stays yours.<p>Only the proposal details you approve are shared through the client link.</p></div>
+      </aside>
+      <div class="workspace-footnotes">
       <p class="notice">Unsaved agreement text, analysis, and draft edits are held in this page’s memory only. Reloading or logging out clears them.</p>
       <p class="sandbox-note"><span class="live-dot" aria-hidden="true"></span> Sandbox workspace · All payments use this demo’s configured merchant. No real funds move.</p>
+      </div>
     </div>
   </main>
   <footer>ScopeShield · Clear scope. Confident work. <a href="/">Back to home</a></footer>
+  </div>
+  </div>
 </body>
 </html>

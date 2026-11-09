@@ -1,142 +1,47 @@
 :root{font-size:16px}
-body.glass-theme{--teal:#17616b;--navy:#09283b;--muted:#46564c;--line:#d6dfd3;--surface:#f8faf6;--text:#15231e;--secondary:#46564c;--quiet:#596b60;--accent:#17616b;--action:#09283b;--input-border:#809083;--input-surface:#ffffff;color:var(--text);background:#eef0ed;isolation:isolate;font-family:"Google Sans",Arial,sans-serif;color-scheme:light;line-height:1.7}
-body.glass-theme:before{content:"";position:fixed;inset:-22vh -18vw;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 14% 20%,#c4d7bf40 0,transparent 42%),radial-gradient(ellipse at 82% 72%,#c1d6d733 0,transparent 44%),linear-gradient(140deg,#f2f4f1,#e9eeea 55%,#f0f3ed);animation:ambient-gradient 28s ease-in-out infinite alternate}
-body.glass-theme:after{content:"";position:fixed;inset:-8vh -12vw;z-index:-1;pointer-events:none;background:url('/assets/forest-waves.svg') center / cover no-repeat;opacity:.7;animation:forest-waves 16s ease-in-out infinite alternate}
-@keyframes forest-waves{0%{transform:translate3d(-4%,2%,0) scale(1.05)}50%{transform:translate3d(1%,-3%,0) scale(1.08)}100%{transform:translate3d(5%,1%,0) scale(1.05)}}
-@keyframes ambient-gradient{0%{transform:translate3d(-2%,-2%,0) rotate(-3deg)}50%{transform:translate3d(3%,1%,0) rotate(1deg)}100%{transform:translate3d(-1%,4%,0) rotate(4deg)}}
-.glass-theme h1,.glass-theme h2,.glass-theme h3,.glass-theme strong{color:#15231e}
+body.glass-theme{--teal:#173bd1;--navy:#111325;--muted:#51566d;--line:#d9dbea;--surface:#fafaf8;--text:#111325;--secondary:#51566d;--quiet:#60657c;--accent:#173bd1;--action:#173bd1;--input-border:#858ba2;--input-surface:#ffffff;font-family:"Google Sans",Arial,sans-serif;color:var(--text);background:#f7f7f3;line-height:1.65;color-scheme:light;isolation:isolate}
+body.glass-theme:before{content:"";position:fixed;inset:-20vh -15vw;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 20% 20%,#cdd6fb33,transparent 45%),radial-gradient(ellipse at 80% 70%,#d8ddf833,transparent 45%);animation:ambient-gradient 30s ease-in-out infinite alternate}
+body.glass-theme:after{content:"";position:fixed;inset:-8vh -12vw;z-index:-1;pointer-events:none;background:url('/assets/forest-waves.svg') center / cover no-repeat;opacity:.2;animation:forest-waves 20s ease-in-out infinite alternate}
+@keyframes ambient-gradient{from{transform:translate3d(-2%,-1%,0)}to{transform:translate3d(3%,3%,0)}}
+@keyframes forest-waves{from{transform:translate3d(-4%,2%,0) scale(1.05)}to{transform:translate3d(5%,-2%,0) scale(1.08)}}
+.glass-theme h1,.glass-theme h2,.glass-theme h3,.glass-theme strong{color:var(--text)}
 .glass-theme h1,.glass-theme h2,.glass-theme h3,.glass-theme .brand{font-family:"Google Sans",Arial,sans-serif}
 .glass-theme p,.glass-theme small,.glass-theme .notice{color:var(--secondary)}
-.glass-theme small,.glass-theme .notice{font-size:.85rem}
-.glass-theme .auth-card>.notice{font-size:.85rem!important}
-.glass-theme .brand{color:#15231e}
-.glass-theme .brand-dot{color:#54794c}
-.glass-theme .topbar,.glass-theme .site-header{position:relative;max-width:1240px;width:calc(100% - 48px);min-height:76px;margin:24px auto 26px;padding:12px 24px;border:1px solid #ffffffc9;border-radius:999px;background:#ffffffb8;box-shadow:0 8px 28px #1a352b0c,inset 0 1px 0 #fff;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
-.glass-theme .brand-logo{background:#ffffff80;border-radius:50%}
-.glass-theme .button,.glass-theme button{border-radius:12px;background:#09283b;border-color:#09283b;box-shadow:0 4px 12px #09283b14}
-.glass-theme .button:hover,.glass-theme button:hover{background:#163e4e;border-color:#163e4e}
-.glass-theme .secondary,.glass-theme #example,.glass-theme #refresh-proposals,.glass-theme #check-status{background:#f8faf6ed;color:#345048;border:1px solid #ffffffd9;box-shadow:0 3px 10px #385d9510}
-.glass-theme .secondary:hover,.glass-theme #example:hover,.glass-theme #refresh-proposals:hover,.glass-theme #check-status:hover{background:#ffffffe0;color:#183e33}
-.glass-theme input,.glass-theme textarea{border-color:var(--input-border);background:var(--input-surface);border-radius:10px;color:#15231e}
-.glass-theme input:focus,.glass-theme textarea:focus{border-color:#477c60;outline-color:#7eaa6e30}
-.glass-theme input::placeholder,.glass-theme textarea::placeholder{color:#596b60}
-.glass-theme .check{background:#edf5ffb3;border-color:#d7e5f5}
-.glass-theme .check input{accent-color:#246bc0}
-.glass-theme .auth-card,.glass-theme .client-main section{background:#f8faf6ed;border:1px solid #ffffffdb;box-shadow:0 14px 45px #2d528d10,inset 0 1px 0 #fff;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:22px}
-.glass-theme .payment-summary{background:#e7f2fdad;border:1px solid #ffffffd9}
-.glass-theme .badge{background:#edf5e6;border-color:#cbdcc0;color:#36594a}
-.glass-theme .badge.warning{background:#fff6ddda;border-color:#eddbab;color:#865c16}
-.glass-theme #status:not(:empty){background:#ffffffb3;border-left-color:#3e85cb;backdrop-filter:blur(10px);color:#2c527e}
-.glass-theme .sandbox-note{color:#4d6584;background:#f1f7ff80;border-color:#d7e5f7}
-.glass-theme footer{background:#ffffff40;border-color:#ffffff9c}
-.glass-theme :focus-visible{outline:3px solid #2b7bd1;outline-offset:4px}
-.glass-theme.dashboard-page .topbar{max-width:1404px;border-radius:999px}
-.glass-theme.dashboard-page .workspace-nav{background:#dfe7da;border:1px solid #ffffff;box-shadow:inset 0 1px 2px #9fbbdf14}
-.glass-theme.dashboard-page .workspace-nav a{color:#345048}
-.glass-theme.dashboard-page .workspace-nav .active{background:#09283b;color:#fff;box-shadow:0 4px 12px #193c6b26}
-.glass-theme.dashboard-page .workspace-nav a:hover{background:#ffffffa6;color:#194b84}
-.glass-theme.dashboard-page .workspace-nav .active:hover{background:#1b4d83;color:#fff}
-.glass-theme.dashboard-page .account button,.glass-theme.dashboard-page .account .badge{background:#ffffff80;border:1px solid #ffffffbf;color:#355b87}
-.glass-theme.dashboard-page .new-analysis{background:#c5ed8b;border:1px solid #acd477;color:#1b3526;box-shadow:0 6px 16px #1d66b926}
-.glass-theme.dashboard-page .widget{background:#fbfcf8de;border:1px solid #e0e7db;box-shadow:0 4px 18px #243b2a08,inset 0 1px 0 #fff;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.glass-theme.dashboard-page .widget-label{color:#294d76}
-.glass-theme.dashboard-page .widget-icon{background:#f9fcffab;border:1px solid #ffffffc2;color:#3d6f9e}
-.glass-theme.dashboard-page .period-label{background:#f8faf6ed;color:#596b60;border:1px solid #ffffffa8}
-.glass-theme.dashboard-page .metric p,.glass-theme.dashboard-page .pipeline-note p{color:#596b60}
-.glass-theme.dashboard-page .lime-tag{background:#def3e2bd;color:#285b3a;border:1px solid #b5d8c1}
-.glass-theme.dashboard-page .eyebrow{color:#596b60}
-.glass-theme.dashboard-page .bar-chart,.glass-theme.dashboard-page .collection-chart{background:repeating-linear-gradient(to top,transparent 0,transparent 44px,#dfe7d999 44px,#dfe7d999 45px);border-bottom-color:#cedbc7}
-.glass-theme.dashboard-page .bar-track{background:#e6eddf}
-.glass-theme.dashboard-page .activity-bar rect{fill:#c5ed8b}
-.glass-theme.dashboard-page .chart-column:last-child rect{fill:#8fba5b}
-.glass-theme.dashboard-page .chart-column small,.glass-theme.dashboard-page .chart-column>span,.glass-theme.dashboard-page .chart-range{color:#596b60}
-.glass-theme.dashboard-page #collection-line{stroke:#17616b}
-.glass-theme.dashboard-page .pipeline-hero>span{color:#596b60}
-.glass-theme.dashboard-page .pipeline-row meter{background:#e3eadc}
-.glass-theme.dashboard-page meter::-webkit-meter-bar{background:#e3eadc}
-.glass-theme.dashboard-page meter::-webkit-meter-optimum-value{background:#a9d776}
-.glass-theme.dashboard-page meter::-moz-meter-bar{background:#a9d776}
-.glass-theme.dashboard-page .pipeline-processing meter::-webkit-meter-optimum-value{background:#9b9fda}
-.glass-theme.dashboard-page .pipeline-processing meter::-moz-meter-bar{background:#9b9fda}
-.glass-theme.dashboard-page .pipeline-failed meter::-webkit-meter-optimum-value{background:#d59d9d}
-.glass-theme.dashboard-page .pipeline-failed meter::-moz-meter-bar{background:#d59d9d}
-.glass-theme.dashboard-page .pipeline-note{color:#365a83;border-top-color:#cbddee}
-.glass-theme.dashboard-page .widget-heading>a{background:#09283b;color:white}
-.glass-theme.dashboard-page .proposal-row{background:#ffffffd9;border-color:#dfe7da;box-shadow:0 3px 12px #243b2a06}
-.glass-theme.dashboard-page .proposal-row button{background:#ffffffab;color:#2c5280;border-color:#cbd9c3;box-shadow:none}
-.glass-theme.dashboard-page .proposal-row button:hover{background:#edf4e7}
-.glass-theme.dashboard-page .proposal-row .danger{color:#964a49;background:#fff6f682;border-color:#e8d0d0}
-.glass-theme.dashboard-page .proposal-row>a{color:#3a6595}
-.glass-theme.dashboard-page .is-open{background:#edf3e7;color:#46603b}
-.glass-theme.dashboard-page .is-paid{background:#e0f2e5;color:#2d6340}
-.glass-theme.dashboard-page .dashboard-empty{background:#eff5e8;border-color:#cedec3}
-.glass-theme.dashboard-page .input-panel,.glass-theme.dashboard-page .request-panel{background:#eff3e9cc;border-color:#ffffffbd}
-.glass-theme.dashboard-page .input-panel textarea{background:transparent}
-.glass-theme.dashboard-page #comparison,.glass-theme.dashboard-page #draft{background:#f8faf6ed;border:1px solid #ffffffd1;box-shadow:0 8px 32px #3b62940b;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.glass-theme.dashboard-page #analyze,.glass-theme.dashboard-page #publish{background:#09283b;border-color:#09283b}
-.glass-theme.dashboard-page .live-dot{background:#729b5d}
-.glass-theme.landing-page .site-header{border-radius:999px}
-.glass-theme.landing-page .signup-link{background:#f8faf6ed;color:#2466ac;border:1px solid #ffffffcf}
-.glass-theme.landing-page .landing-hero:before{display:none}
-.glass-theme.landing-page .orange-label,.glass-theme.landing-page .step-number,.glass-theme.landing-page .landing-feature-grid article>span{color:#2a70b8}
-.glass-theme.landing-page h1 span{color:#4f7442}
-.glass-theme.landing-page .black-button{background:#09283b;border-color:#09283b;color:#fff;box-shadow:0 7px 20px #1e538b24}
-.glass-theme.landing-page .black-button:hover{background:#245c94}
-.glass-theme.landing-page .story-link>span{background:#f8faf6eb;color:#2362a2;border:1px solid #ffffffd9;box-shadow:0 4px 12px #4778ad10}
-.glass-theme.landing-page .art-orbit{background:conic-gradient(from 18deg,#c5ed8b 0deg 18deg,#314e40 18deg 55deg,#d6edb8 55deg 77deg,#314e40 77deg 180deg,#183c33 180deg 360deg);box-shadow:inset -22px -30px 60px #071f4a40,0 15px 70px #5197d51f}
-.glass-theme.landing-page .art-orbit:after{border-color:#ffffffc9}
-.glass-theme.landing-page .hero-proposal{background:linear-gradient(125deg,#ffffffbd,#e1effbb3);border:1px solid #fffffff2;box-shadow:0 24px 70px #224d871f,inset 0 1px 0 #fff;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
-.glass-theme.landing-page .floating-request{background:#ffffffb3;border-color:#ffffffe8;box-shadow:0 12px 30px #325d8912;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:#325d8b}
-.glass-theme.landing-page .floating-request span{color:#397abb}
-.glass-theme.landing-page .hero-price strong>span{color:#7296b6}
-.glass-theme.landing-page .hero-terms{border-top-color:#b9cee49c;color:#536e8d}
-.glass-theme.landing-page .review-chip{background:#e4f4eb9e;border-color:#bbd6c6;color:#3f6953}
-.glass-theme.landing-page .hero-payline,.glass-theme.landing-page .proposal-caption,.glass-theme.landing-page .hero-price>span{color:#4b6c8f}
-.glass-theme.landing-page .hero-art figcaption{background:transparent;border:0;color:#596b60}
-.glass-theme.landing-page .story-divider path{stroke:#6f94ba}
-.glass-theme.landing-page .story-step,.glass-theme.landing-page .dashboard-story,.glass-theme.landing-page .feature-section,.glass-theme.landing-page .judge-note{border-top-color:#d5dfce}
-.glass-theme.landing-page .product-capture,.glass-theme.landing-page .interface-preview{background:#f8faf6ed;border-color:#ffffffdb;box-shadow:0 10px 32px #253f2e0a;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-.glass-theme.landing-page .capture-bar{background:#ffffff61;border-bottom-color:#d2e2f3;color:#596b60}
-.glass-theme.landing-page figcaption{background:#ffffff4a;border-top-color:#d2e2f3;color:#596b60}
-.glass-theme.landing-page .preview-content{background:#ffffff52}
-.glass-theme.landing-page .quote-pair>div,.glass-theme.landing-page .preview-field{background:#f1f5eb;border:1px solid #ffffffca}
-.glass-theme.landing-page .quote-pair>div:last-child{background:#fdf5e6b3}
-.glass-theme.landing-page .evidence-note,.glass-theme.landing-page .checkout-amount{background:#e7f0e2}
-.glass-theme.landing-page .preview-button{background:#09283b}
-.glass-theme.landing-page .paypal-preview{background:#0070ba}
-.glass-theme.landing-page .sandbox-label{background:#ffffff8a;border:1px solid #ffffffc7;color:#486d96}
-.glass-theme.landing-page .mini-content{background:#e7ede2}
-.glass-theme.landing-page .mini-metrics>div,.glass-theme.landing-page .mini-panels>div{background:#ffffff80;border:1px solid #ffffffc9}
-.glass-theme.landing-page .mini-greeting>span{background:#d7eabf;color:#34542a}
-.glass-theme.landing-page .mini-chart span{background:#e6eddf}
-.glass-theme.landing-page .mini-chart{border-bottom-color:#d5dfce;background:repeating-linear-gradient(to top,transparent 0,transparent 29px,#dce6d299 29px,#dce6d299 30px)}
-.glass-theme.landing-page .landing-feature-grid article{border-top-color:#bfd4ec}
-.glass-theme.landing-page .text-link{border-bottom-color:#aac5e3;color:#245f9d}
-.glass-theme.landing-page .final-cta{background:#ffffff80;border:1px solid #ffffffcf;box-shadow:0 12px 40px #315b8c0c;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-@media(max-width:850px){.glass-theme.dashboard-page .topbar{border-radius:32px;row-gap:12px}.glass-theme.dashboard-page .workspace-nav{width:auto;flex:1 1 100%;justify-content:center;border-radius:24px}}
-@media(max-width:620px){.glass-theme .topbar,.glass-theme .site-header{width:calc(100% - 24px);margin:12px auto 20px;padding:10px 16px;min-height:64px;gap:10px;border-radius:32px}.glass-theme.dashboard-page .topbar{border-radius:28px}.glass-theme.dashboard-page .workspace-nav a{padding:8px 10px}.glass-theme.landing-page .site-header{border-radius:999px}.glass-theme .topbar>.badge{font-size:.55rem}.glass-theme .auth-layout{min-height:0}}
-
-.glass-theme nav a,.glass-theme .account>a:not(.button){color:#345048}
-.glass-theme.dashboard-page .metric p,.glass-theme.dashboard-page .pipeline-note p,.glass-theme.dashboard-page .chart-widget>p{color:#46564c;font-size:.8rem}
-.glass-theme.dashboard-page .widget-label{font-size:.85rem;color:#283d30}
-.glass-theme.dashboard-page .period-label{font-size:.72rem;color:#46564c;white-space:normal;text-align:center}
-.glass-theme.dashboard-page .chart-column small,.glass-theme.dashboard-page .chart-column>span,.glass-theme.dashboard-page .chart-range{font-size:.75rem;color:#46564c}
-.glass-theme.dashboard-page .pipeline-row,.glass-theme.dashboard-page .pipeline-hero>span,.glass-theme.dashboard-page .pipeline-note{font-size:.82rem;color:#46564c}
-.glass-theme.dashboard-page .input-panel textarea{font-size:.95rem}
-.glass-theme.dashboard-page .proposal-row button,.glass-theme.dashboard-page .proposal-row>a,.glass-theme.dashboard-page .proposal-row p{font-size:.8rem}
-.glass-theme.landing-page .hero-description,.glass-theme.landing-page .step-copy>p,.glass-theme.landing-page .story-problem p,.glass-theme.landing-page .dashboard-story-heading>p,.glass-theme.landing-page .landing-feature-grid p,.glass-theme.landing-page .judge-note p:not(.orange-label){color:#46564c;font-size:.95rem;line-height:1.9}
-.glass-theme.landing-page .hero-footnote,.glass-theme.landing-page figcaption,.glass-theme.landing-page .hero-art figcaption{font-size:.75rem;color:#596b60}
-.glass-theme.landing-page .orange-label,.glass-theme.landing-page .step-number,.glass-theme.landing-page .landing-feature-grid article>span{color:#3e6e4f;font-size:.85rem}
-.glass-theme.landing-page .capture-bar,.glass-theme.landing-page .quote-pair small,.glass-theme.landing-page .preview-field small,.glass-theme.landing-page .checkout-amount small{font-size:.72rem;color:#46564c}
-.glass-theme.landing-page .preview-content p,.glass-theme.landing-page .quote-pair blockquote,.glass-theme.landing-page .preview-field p{font-size:.85rem;color:#345048}
-.glass-theme.landing-page .preview-button{font-size:.85rem}
-.glass-theme.landing-page .verification-note{font-size:.75rem!important;color:#596b60}
-.glass-theme.landing-page .mini-metrics small,.glass-theme.landing-page .mini-panels p{font-size:.8rem;color:#46564c}
-.glass-theme.landing-page .mini-greeting>span{font-size:.75rem;background:#c5ed8b;color:#1b3526}
-.glass-theme.landing-page .hero-proposal{background:linear-gradient(125deg,#fffffff0,#edf4e3ef);border-color:#fff}
-.glass-theme.landing-page .floating-request{color:#345048}
-.glass-theme.landing-page .hero-price>span,.glass-theme.landing-page .hero-payline,.glass-theme.landing-page .proposal-caption{color:#46564c;font-size:.75rem}
-@media(max-width:1100px){.glass-theme.dashboard-page .metric .period-label{display:none}}
-@media(max-width:620px){.glass-theme.landing-page .mini-metrics{grid-template-columns:1fr}.glass-theme.landing-page .hero-terms{align-items:flex-start;flex-direction:column}.glass-theme.landing-page .hero-art{min-height:440px}.glass-theme.landing-page .capture-bar{font-size:.62rem}}
+.glass-theme small,.glass-theme .notice{font-size:.82rem}
+.glass-theme a{color:var(--accent)}
+.glass-theme .brand{color:var(--text);letter-spacing:-.045em}
+.glass-theme .brand-dot{color:var(--accent)}
+.glass-theme .brand-logo{background:#fff;border-radius:50%}
+.glass-theme .topbar,.glass-theme .site-header{position:relative;max-width:1240px;width:calc(100% - 48px);min-height:76px;margin:24px auto;padding:12px 24px;border:1px solid #dddfea;border-radius:999px;background:#ffffffc9;box-shadow:0 5px 25px #20285406;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.glass-theme nav a,.glass-theme .account>a:not(.button){color:#30354c}
+.glass-theme .button,.glass-theme button{background:var(--action);border:1px solid var(--action);color:white;border-radius:8px;box-shadow:none;font-weight:600}
+.glass-theme .button:hover,.glass-theme button:hover{background:#102b9e;border-color:#102b9e;color:#fff}
+.glass-theme button:disabled{opacity:.65;cursor:wait}
+.glass-theme .secondary,.glass-theme #example,.glass-theme #refresh-proposals,.glass-theme #check-status{background:#fff;color:#30354c;border:1px solid #c8cce0}
+.glass-theme .secondary:hover,.glass-theme #example:hover,.glass-theme #refresh-proposals:hover,.glass-theme #check-status:hover{background:#edf0fe;color:#111325}
+.glass-theme label{color:#262b42;font-size:.9rem;font-weight:600}
+.glass-theme input,.glass-theme textarea{color:var(--text);background:var(--input-surface);border:1px solid var(--input-border);border-radius:8px;caret-color:var(--accent)}
+.glass-theme input::placeholder,.glass-theme textarea::placeholder{color:var(--quiet);opacity:1}
+.glass-theme input:focus,.glass-theme textarea:focus{border-color:#173bd1;outline:3px solid #173bd11f}
+.glass-theme .check{background:#f0f2fc;border-color:#c8cfe6;color:#30354c}
+.glass-theme .check input{accent-color:#173bd1}
+.glass-theme .auth-card,.glass-theme .client-main section{background:#ffffffed;border:1px solid #d8dce9;border-radius:16px;box-shadow:0 12px 40px #161d3d08;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.glass-theme .auth-card>.notice{font-size:.82rem!important}
+.glass-theme .auth-steps span{color:var(--accent)}
+.glass-theme .badge{background:#eaf0ff;color:#1939a8;border-color:#cad5fb;font-size:.72rem}
+.glass-theme .badge.warning{background:#fff6e4;color:#855d13;border-color:#e9d29d}
+.glass-theme .eyebrow{color:#565d79;font-size:.7rem}
+.glass-theme #status:not(:empty){background:#edf1ff;border-left-color:#173bd1;color:#223a82}
+.glass-theme .sandbox-note{background:#f0f2fc;border-color:#d5dbed;color:#4a5678}
+.glass-theme footer{background:transparent;border-color:#d9dbea;color:#51566d}
+.glass-theme .insight{background:#fff6e6;border-left-color:#d5ad54;color:#6d551f}
+.glass-theme .item{background:#fff;border-color:#d8dce9}
+.glass-theme blockquote{background:#f2f4fc;border-color:#778bdd;color:#303a61}
+.glass-theme #items .item blockquote:nth-of-type(1){background:#fff8e9;border-color:#d3ad61}
+.glass-theme .payment-summary{background:#edf1ff;border-color:#cbd5f3}
+.glass-theme .payment-summary #amount,.glass-theme .payment-summary #delivery{color:#111325}
+.glass-theme #receipt{background:#eaf5ed;color:#285737;border:1px solid #b9d8c0}
+.glass-theme :focus-visible{outline:3px solid #3157eb;outline-offset:4px}
+@media(max-width:620px){.glass-theme .topbar,.glass-theme .site-header{width:calc(100% - 24px);padding:10px 16px;margin:12px auto 20px;min-height:64px;border-radius:30px;gap:12px}.glass-theme .auth-layout{min-height:0}}
 @media(prefers-reduced-motion:reduce){body.glass-theme:before,body.glass-theme:after{animation:none;transform:none}.glass-theme{scroll-behavior:auto}}
-@media(prefers-reduced-transparency:reduce){.glass-theme .widget,.glass-theme .auth-card,.glass-theme .client-main section,.glass-theme .interface-preview,.glass-theme .preview-content,.glass-theme .hero-proposal,.glass-theme .product-capture,.glass-theme .final-cta{background:#f8fbff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
+@media(prefers-reduced-transparency:reduce){.glass-theme .widget,.glass-theme .auth-card,.glass-theme .client-main section,.glass-theme .interface-preview,.glass-theme .preview-content,.glass-theme .product-capture,.glass-theme .final-cta{background:#fafaf8!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
