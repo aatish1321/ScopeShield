@@ -96,7 +96,7 @@ async function start() {
     $('status').textContent = $('payment-status').textContent;
   } else if (returned === 'cancel') {
     $('status').textContent = 'Checkout cancelled. A cancellation does not confirm payment; check status if you are unsure.';
-  } else $('status').textContent = 'Review the approved work, price, and delivery change below.';
+  } else $('status').textContent = '';
 }
 
 start().catch(error => {

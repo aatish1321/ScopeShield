@@ -1,12 +1,7 @@
 /* Client change orders use a document and checkout layout. */
-.receipt-page .client-main{max-width:1200px;padding:16px 28px 64px}
-.receipt-page .topbar{min-height:68px;margin-bottom:24px}
-.client-intro{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:16px 0 20px}
-.client-intro .eyebrow{font-family:inherit;font-size:.72rem;letter-spacing:.08em;color:#52617b;margin:0 0 12px}
-.receipt-page .client-intro h1{font-size:clamp(1.9rem,3vw,2.6rem);font-weight:500;line-height:1.14;letter-spacing:-.05em;margin:0 0 12px}
-.client-intro p:last-child{font-size:.9rem;margin:0;color:#515d75}
-.client-sandbox{flex-shrink:0;border:1px solid #cbd6ed;border-radius:12px;background:#ffffffb3;padding:13px 18px;font-size:.8rem;font-weight:600;color:#233f83}
-.client-sandbox span{display:block;color:#566681;font-size:.75rem;font-weight:400;margin-top:3px}
+.receipt-page .client-main{max-width:none;width:100%;padding:0 24px 32px}
+.receipt-page .topbar{max-width:none;width:calc(100% - 48px);min-height:68px;margin:20px 24px}
+
 .receipt-page #status:not(:empty){border:0;background:transparent;padding:0;margin:0 0 18px;font-size:.8rem;color:#4e607e}
 .receipt-page #proposal{padding:0;margin:0;border:1px solid #cbd5e8;border-radius:20px;background:#ffffffed;box-shadow:0 18px 65px #152b6010;backdrop-filter:blur(16px)}
 .receipt-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding:30px 34px;margin:0;border:0;border-radius:19px 19px 0 0;background:radial-gradient(ellipse at 95% 10%,#284ac5,transparent 60%),#111d43}
@@ -14,8 +9,8 @@
 .receipt-page .receipt-heading h2{font-size:1.65rem;font-weight:500;line-height:1.4;letter-spacing:-.035em;color:#fff;margin:0;overflow-wrap:anywhere}
 .receipt-date{display:grid;gap:5px;text-align:right;white-space:nowrap;font-size:.75rem;color:#c5d5ff}
 .receipt-date time{font-size:.85rem;color:#fff}
-.receipt-layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;align-items:start}
-.receipt-document{padding:32px 34px;min-width:0}
+.receipt-layout{min-height:calc(100vh - 260px);display:grid;grid-template-columns:minmax(0,1fr) 400px;align-items:start}
+.receipt-document{padding:36px 40px;min-width:0}
 .document-section-title{display:flex;justify-content:space-between;gap:16px;margin-bottom:18px;font-size:.7rem;font-weight:600;letter-spacing:.07em;color:#596783}
 .document-section-title span:last-child{letter-spacing:0;font-weight:400}
 .scope-comparison{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:26px}
@@ -24,7 +19,7 @@
 .receipt-step{display:block;font-size:.7rem;font-weight:600;letter-spacing:.05em;color:#566580;margin-bottom:9px}
 .scope-after .receipt-step{color:#173bab}
 .receipt-page .client-main h3{font-size:.95rem;line-height:1.5;font-weight:600;letter-spacing:-.015em;color:#1f2c46;margin:0 0 10px}
-.receipt-page .proposal-text{font-size:.9rem;line-height:1.9;color:#495773;margin:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.receipt-page .proposal-text{font-size:1rem;line-height:1.9;color:#495773;margin:0;overflow-wrap:anywhere;white-space:pre-wrap}
 .effort-section{padding:0 0 24px;margin:0 0 24px;border-bottom:1px solid #e0e5ef}
 .receipt-page .receipt-caption{font-size:.75rem;line-height:1.8;color:#566681;margin:14px 0 0}
 .delivery-section{display:grid;grid-template-columns:130px 1fr;gap:20px;padding:17px 20px;background:#f1f5fc;border:1px solid #d9e3f2;border-radius:10px}
@@ -58,6 +53,6 @@
 .share-context-note strong{font-size:.9rem}
 .share-context-note p{font-size:.8rem;margin:6px 0 0;line-height:1.8}
 @media(max-width:960px){.receipt-layout{grid-template-columns:minmax(0,1fr) 320px}.receipt-document{padding:26px}.receipt-sidebar{padding:20px;margin:24px 20px 24px 0}.receipt-heading{padding:26px}.delivery-section{grid-template-columns:1fr;gap:8px}}
-@media(max-width:760px){.receipt-page .client-main{padding:8px 16px 40px}.client-intro{align-items:flex-start}.client-sandbox{padding:9px 12px;font-size:.7rem}.client-sandbox span{font-size:.65rem}.receipt-layout{grid-template-columns:1fr}.receipt-sidebar{position:static;margin:0 20px 22px;padding:22px}.receipt-document{padding:24px 22px}.receipt-heading{padding:24px 22px}.receipt-date{font-size:.7rem}.receipt-page .receipt-heading h2{font-size:1.4rem}.scope-before,.scope-after{padding:18px}.receipt-total strong{font-size:2rem}.delivery-section{grid-template-columns:130px 1fr}.receipt-page #document-kind{font-size:.65rem}}
-@media(max-width:480px){.client-intro{display:block}.client-sandbox{display:inline-block;margin-top:16px}.client-sandbox span{display:inline;margin-left:8px}.receipt-heading{flex-direction:column;gap:18px}.receipt-date{text-align:left;display:flex;gap:10px}.receipt-document{padding:22px 18px}.receipt-sidebar{margin:0 14px 18px;padding:18px}.delivery-section{grid-template-columns:1fr}.receipt-page .topbar .badge{font-size:.6rem}.receipt-page .topbar .brand{font-size:1.15rem}.receipt-page .topbar .brand-logo{width:32px;height:36px}}
+@media(max-width:760px){.receipt-page .client-main{padding:0 12px 24px}.receipt-page .topbar{width:calc(100% - 24px);margin:12px}.receipt-layout{grid-template-columns:1fr}.receipt-sidebar{position:static;margin:0 20px 22px;padding:22px}.receipt-document{padding:24px 22px}.receipt-heading{padding:24px 22px}.receipt-date{font-size:.7rem}.receipt-page .receipt-heading h2{font-size:1.4rem}.scope-before,.scope-after{padding:18px}.receipt-total strong{font-size:2rem}.delivery-section{grid-template-columns:130px 1fr}.receipt-page #document-kind{font-size:.65rem}}
+@media(max-width:480px){.receipt-heading{flex-direction:column;gap:18px}.receipt-date{text-align:left;display:flex;gap:10px}.receipt-document{padding:22px 18px}.receipt-sidebar{margin:0 14px 18px;padding:18px}.delivery-section{grid-template-columns:1fr}.receipt-page .topbar .badge{font-size:.6rem}.receipt-page .topbar .brand{font-size:1.15rem}.receipt-page .topbar .brand-logo{width:32px;height:36px}}
 @media(prefers-reduced-transparency:reduce){.receipt-page #proposal{background:#fff;backdrop-filter:none}}
