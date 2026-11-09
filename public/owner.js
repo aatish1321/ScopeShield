@@ -146,6 +146,7 @@ const usd = cents => new Intl.NumberFormat('en-US', { style: 'currency', currenc
 function renderDashboard(proposals) {
   const metrics = dashboardMetrics(proposals);
   $('total-count').textContent = String(metrics.total);
+  $('nav-proposal-count').textContent = String(metrics.total);
   $('paid-count').textContent = String(metrics.groups.paid);
   $('paid-total').textContent = usd(metrics.paidCents);
   $('open-total').textContent = usd(metrics.openCents);
@@ -208,6 +209,11 @@ async function refreshProposals() {
   if (!proposals.length) {
     const empty = document.createElement('div');
     empty.className = 'dashboard-empty';
+    const mark = document.createElement('span');
+    mark.className = 'empty-document';
+    mark.setAttribute('aria-hidden', 'true');
+    mark.textContent = '↗';
+    empty.append(mark);
     addText(empty, 'h3', 'Your next agreement starts here.');
     addText(empty, 'p', 'Compare a client request, review the terms, and publish your first proposal.');
     const start = document.createElement('a');
@@ -219,10 +225,16 @@ async function refreshProposals() {
   for (const proposal of proposals) {
     const card = document.createElement('article');
     card.className = 'item proposal-row';
+    const cover = document.createElement('div');
+    cover.className = 'proposal-cover';
+    addText(cover, 'small', 'CHANGE ORDER');
+    addText(cover, 'strong', `${usd(proposal.amountCents)} USD`);
+    addText(cover, 'span', new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(proposal.createdAt)));
+    card.append(cover);
     addText(card, 'h3', proposal.title);
+    addText(card, 'p', proposal.work.length > 120 ? `${proposal.work.slice(0, 120)}…` : proposal.work);
     const meta = document.createElement('div');
     meta.className = 'proposal-meta';
-    addText(meta, 'strong', `${usd(proposal.amountCents)} USD`);
     const state = document.createElement('span');
     state.className = `proposal-state ${proposal.status === 'paid' ? 'is-paid' : 'is-open'}`;
     state.textContent = proposal.status;
@@ -233,7 +245,8 @@ async function refreshProposals() {
     link.href = `/p/${proposal.token}`;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
-    link.textContent = new URL(link.href).href;
+    link.textContent = 'Open change order ↗';
+    link.setAttribute('aria-label', `Open change order: ${proposal.title}`);
     card.append(link);
     const copy = document.createElement('button');
     copy.type = 'button';
@@ -243,7 +256,7 @@ async function refreshProposals() {
         await navigator.clipboard.writeText(link.href);
         $('status').textContent = 'Client link copied. Anyone with this link can view the proposal.';
       } catch {
-        $('status').textContent = 'Could not copy automatically. Copy the displayed link manually.';
+        $('status').textContent = 'Automatic copy is unavailable. Right-click “Open change order” and copy its link.';
       }
     });
     card.append(document.createElement('br'), copy);

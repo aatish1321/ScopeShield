@@ -17,27 +17,28 @@
     <a class="brand" href="/" aria-label="ScopeShield home"><img class="brand-logo" src="/assets/scopeshield-logo.png" alt="" width="40" height="44"><span>ScopeShield<span class="brand-dot">.</span></span></a>
     <a class="button sidebar-create" href="#analysis-section">New scope analysis <span aria-hidden="true">＋</span></a>
     <p class="sidebar-label">WORKSPACE</p>
-    <nav class="workspace-nav" aria-label="Workspace"><a class="active" href="#overview"><span aria-hidden="true">▦</span> Overview</a><a href="#analysis-section"><span aria-hidden="true">✳</span> Scope comparison</a><a href="#published"><span aria-hidden="true">▤</span> Published proposals</a></nav>
+    <nav class="workspace-nav" aria-label="Workspace"><a class="active" href="#overview"><span aria-hidden="true">▦</span> Overview</a><a href="#analysis-section"><span aria-hidden="true">✳</span> Scope comparison</a><a href="#published"><span aria-hidden="true">▤</span> Published proposals <span id="nav-proposal-count" class="nav-count">0</span></a></nav>
     <div class="sidebar-explainer"><span class="sidebar-label">THE WORKFLOW</span><p>Compare the request.<br>Agree on the change.<br>Get paid for the extra.</p><a href="/">How ScopeShield works ↗</a></div>
     <div class="sidebar-bottom"><span class="badge">PayPal sandbox</span><div class="sidebar-user"><span class="user-mark" aria-hidden="true">S</span><div><span id="account-name"></span><small>Freelancer workspace</small></div></div><button id="logout" class="secondary" type="button">Log out ↗</button></div>
   </aside>
   <div class="app-content">
   <header class="topbar app-topbar"><span>Workspace <span class="breadcrumb-divider">/</span> Overview</span><a href="https://github.com/aatish1321/ScopeShield#demo-walkthrough" target="_blank" rel="noopener noreferrer">Setup & demo guide ↗</a></header>
   <main>
-    <div class="page-heading"><div><p class="eyebrow">YOUR FREELANCE WORK, AT A GLANCE</p><h1 id="welcome">What changed in your project?</h1><p id="workspace-greeting">Your agreements, change proposals, and payments. One clear workspace.</p></div><a class="button new-analysis" href="#analysis-section">＋ New scope analysis</a></div>
+
     <p id="status" role="status" aria-live="polite"></p>
     <div id="workspace" class="workspace-grid" hidden>
       <div class="workspace-main">
       <section id="analysis-section" class="analysis-section widget" aria-labelledby="compare-title">
+        <div class="composer-atmosphere" aria-hidden="true"></div>
+    <div class="page-heading"><div><p class="eyebrow">YOUR FREELANCE WORK, AT A GLANCE</p><h1 id="welcome">What changed in your project?</h1><p id="workspace-greeting">Your agreements, change proposals, and payments. One clear workspace.</p></div><a class="button new-analysis" href="#analysis-section">＋ New scope analysis</a></div>
         <div class="section-heading"><div><p class="eyebrow">START WITH THE AGREEMENT</p><h2 id="compare-title">Compare the agreement.</h2></div></div>
         <p>AI is advisory. Review its reasoning before proposing extra work. Submitted text is sent to Groq; use synthetic examples while testing.</p>
-        <button type="button" id="example">Load website example</button>
         <form id="analysis-form">
           <div class="split"><div class="input-panel"><span class="eyebrow">THE BASELINE</span><label for="agreement">Original agreement</label>
           <textarea id="agreement" rows="6" required maxlength="20000" placeholder="Paste the work and terms originally agreed with your client."></textarea>
           </div><div class="input-panel request-panel"><span class="eyebrow">THE CHANGE</span><label for="request">New client request</label>
           <textarea id="request" rows="6" required maxlength="20000" placeholder="Paste what the client is asking to add or change."></textarea>
-          </div></div><div class="form-actions"><p>AI finds the context. You make the call.</p><button id="analyze" type="submit">Analyze request →</button></div>
+          </div></div><div class="form-actions"><p>AI finds the context.<br>You make the call.</p><div class="composer-controls"><button type="button" id="example">Load example</button><button id="analyze" type="submit">Analyze request ↗</button></div></div>
         </form>
       </section>
       <div id="overview" class="dashboard-overview" aria-label="Proposal dashboard" aria-busy="true">
@@ -46,16 +47,17 @@
           <article class="widget metric"><div class="widget-label"><span><span class="widget-icon" aria-hidden="true">↗</span> Collected in sandbox</span><span class="period-label">Current proposals · USD</span></div><div class="metric-value"><strong id="paid-total">—</strong><span class="lime-tag"><span id="paid-count">—</span> paid</span></div><p>Confirmed by PayPal sandbox.</p></article>
           <article class="widget metric"><div class="widget-label"><span><span class="widget-icon" aria-hidden="true">◷</span> Awaiting payment</span><span class="period-label">Current proposals · USD</span></div><strong id="open-total">—</strong><p id="open-count">Loading your proposals…</p></article>
         </div>
+      <section id="published" class="widget" aria-labelledby="published-title">
+        <div class="widget-heading"><div><p class="eyebrow">YOUR WORK, MOVING FORWARD</p><h2 id="published-title">Published proposals</h2></div><button id="refresh-proposals" type="button">↻ Refresh</button></div>
+        <div id="proposals"></div>
+      </section>
         <div class="dashboard-grid">
           <section class="widget chart-widget" aria-labelledby="activity-title"><div class="widget-heading"><h2 id="activity-title"><span class="widget-icon" aria-hidden="true">▥</span> Proposal activity</h2><span class="period-label">Last 7 days · UTC</span></div><strong class="chart-total" id="week-total">—</strong><p>Proposals published in the last 7 days</p><div id="activity-chart" class="bar-chart" role="img" aria-label="Proposal activity is loading"></div></section>
 
 
         </div>
       </div>
-      <section id="published" class="widget" aria-labelledby="published-title">
-        <div class="widget-heading"><div><p class="eyebrow">YOUR WORK, MOVING FORWARD</p><h2 id="published-title">Published proposals</h2></div><button id="refresh-proposals" type="button">↻ Refresh</button></div>
-        <div id="proposals"></div>
-      </section>
+
       <section id="comparison" aria-labelledby="comparison-title" hidden>
         <p class="eyebrow">AI COMPARISON / REVIEW THE EVIDENCE</p><h2 id="comparison-title">What changed?</h2>
         <p id="classification" class="badge warning"></p>

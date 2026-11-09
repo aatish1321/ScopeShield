@@ -27,7 +27,7 @@ AI does not set binding prices, promise delivery dates, send messages, or charge
 
 | Check | Evidence |
 | --- | --- |
-| Automated behavior and security checks | Previous full run: 56 passing tests. Latest editorial UI update: 47 non-HTTP checks pass inside a disposable, network-isolated Bubblewrap runtime; HTTP tests still await dependency verification. Payment tests use mocked PayPal responses |
+| Automated behavior and security checks | Previous full run: 56 passing tests. Latest dashboard update: 49 non-HTTP checks pass inside a disposable, network-isolated Bubblewrap runtime; HTTP tests still await dependency verification. Payment tests use mocked PayPal responses |
 | Real Groq access | Synthetic additional, included, and unclear cases exercised successfully, including the multiline website/store example |
 | Persistence | A published synthetic proposal and its original client link survived an actual application restart |
 | Real PayPal sandbox access | OAuth, order creation, and order retrieval passed; stored USD amount, reference, merchant, and approval destination verified |
@@ -134,7 +134,7 @@ The landing page walks through agreement input, AI comparison, reviewed publicat
 
 The dashboard uses your current, non-deleted proposals for totals and payment-state counts. Charts show publication activity over seven UTC calendar days and cumulative confirmed sandbox collections over thirty UTC calendar days. Deleting a proposal removes it from these widgets; they are a workspace overview, not an accounting ledger. Status remains the last saved PayPal state until refreshed through **Check payment status**.
 
-The interface uses off-white surfaces, ink text, and cobalt accents throughout. The landing page uses bold editorial headings, fine grid details, and a guided product story. The dashboard uses a left sidebar, central comparison/proposal workspace, and a right-hand payment overview. Google Sans and restrained glass/animation effects remain; the waves and ambient gradient stop when reduced motion is enabled. Google Sans loads through Google Fonts, with an Arial/system sans-serif fallback if unavailable; the browser makes font requests to Google. Forms, publication controls, and client checkout retain their existing behavior. No chart library, browser storage, or additional runtime dependency was added.
+The interface uses off-white surfaces, ink text, and cobalt accents throughout. The landing page uses bold editorial headings, fine grid details, and a guided product story. The dashboard uses a compact left sidebar, a central glass comparison composer with decorative cobalt artwork, and stacked payment widgets on the right. Published proposals have document-style covers showing their actual additional fee and publication date; empty accounts show an empty state. Google Sans and restrained glass/animation effects remain; the waves and ambient gradient stop when reduced motion is enabled. Google Sans loads through Google Fonts, with an Arial/system sans-serif fallback if unavailable; the browser makes font requests to Google. Forms, publication controls, and client checkout retain their existing behavior. No chart library, browser storage, or additional runtime dependency was added.
 
 ## How PayPal and AI are used
 
