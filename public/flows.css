@@ -1,0 +1,92 @@
+/* Shared account, review, editor and client surfaces follow the dashboard. */
+.glass-theme .auth-layout{max-width:1160px;grid-template-columns:1fr 1fr;gap:48px;align-items:center;padding:38px 32px 60px;min-height:calc(100vh - 124px)}
+.glass-theme .auth-story{position:relative;overflow:hidden;border:1px solid #ccd9f1;border-radius:22px;padding:44px 34px;background:linear-gradient(120deg,#f7faffeb,#e5eeff9e),url('/assets/dashboard-studio.png') 65% center / cover;box-shadow:0 15px 45px #244a8c0a;min-height:520px;display:flex;flex-direction:column;justify-content:center}
+.glass-theme .auth-story>.badge{align-self:flex-start;background:#ffffffbd;border-color:#c4d5f5;font-size:.75rem;color:#4e6b9d;margin-bottom:24px}
+.glass-theme .auth-story h1{font-size:2.5rem;font-weight:500;line-height:1.12;letter-spacing:-.06em;margin:0 0 20px;max-width:410px}
+.glass-theme .auth-story>p{font-size:.9rem;line-height:1.95;max-width:380px;color:#526d98;margin:0}
+.glass-theme .auth-steps{display:grid;gap:10px;margin:30px 0}
+.glass-theme .auth-steps p{display:flex;align-items:center;gap:12px;border:1px solid #cbdaf4;background:#ffffffa3;border-radius:8px;padding:10px 13px;font-size:.8rem;color:#3d5b8b;margin:0;max-width:355px;backdrop-filter:blur(10px)}
+.glass-theme .auth-steps span{font-size:.75rem;margin:0;color:#455f86}
+.glass-theme .auth-story>.notice{font-size:.75rem;line-height:1.8;color:#455f86}
+.glass-theme .auth-card{padding:36px;border:1px solid #d0ddf2;border-radius:18px;background:#ffffffeb;box-shadow:0 14px 40px #244a8c09}
+.glass-theme .auth-card>.eyebrow{font-size:.75rem;letter-spacing:.06em;color:#455f86;margin-bottom:10px}
+.glass-theme .auth-card h2{font-size:1.9rem;line-height:1.25;font-weight:500;letter-spacing:-.05em;margin:0 0 12px}
+.glass-theme .auth-card>p:not(.eyebrow){font-size:.85rem;line-height:1.85;color:#455f86}
+.glass-theme .auth-card label{font-size:.82rem;color:#3f5a88;margin:18px 0 8px}
+.glass-theme .auth-card input{border:1px solid var(--input-border);border-radius:9px;background:#f9fbff;padding:12px 14px;font-size:.9rem;min-height:46px}
+.glass-theme .auth-card input:focus{border-color:#5278cd;outline:3px solid #173bd11a;background:#fff}
+.glass-theme .auth-card small{display:block;font-size:.75rem;line-height:1.8;color:#455f86;margin-top:7px}
+.glass-theme .auth-card button{border-radius:9px;font-size:.85rem;padding:12px 16px;min-height:46px;box-shadow:0 5px 15px #173bd118;margin-top:24px}
+.glass-theme #switch-prompt{margin:24px 0 2px;font-size:.8rem}
+.glass-theme #switch-auth{font-size:.82rem;font-weight:550;text-decoration:none}
+.glass-theme .auth-card>.notice{font-size:.75rem!important;color:#455f86;line-height:1.9;border-top:1px solid #e0e7f3;padding-top:18px;margin-top:24px}
+.dashboard-page #comparison,.dashboard-page #draft{border:1px solid #cbdaf2;background:#ffffffeb;border-radius:14px;box-shadow:0 10px 30px #234b9507;padding:28px}
+.dashboard-page #comparison>.eyebrow,.dashboard-page #draft>.eyebrow{font-size:.75rem;letter-spacing:.04em;color:#455f86;margin-bottom:10px}
+.dashboard-page #comparison h2,.dashboard-page #draft h2{font-size:1.7rem;font-weight:500;line-height:1.3;letter-spacing:-.045em;margin-bottom:16px}
+.dashboard-page #review-warning{font-size:.82rem;line-height:1.9;color:#455f86;margin-bottom:22px}
+.dashboard-page #summary{border:1px solid #e7d5aa;border-left:3px solid #d5ae57;border-radius:9px;background:#fff9ee;padding:18px 20px;font-size:.88rem;line-height:1.85;color:#7a653b}
+.dashboard-page #items .item{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;background:#f9fbff;border:1px solid #d4e0f3;border-radius:12px;padding:20px;overflow:hidden}
+.dashboard-page #items .item>h3{grid-column:1/-1;font-size:.95rem;font-weight:550;line-height:1.6;letter-spacing:-.02em;margin:0 0 8px;color:#344f7b}
+.dashboard-page #items .item>p:nth-of-type(1){grid-column:1;grid-row:2}
+.dashboard-page #items .item>p:nth-of-type(2){grid-column:2;grid-row:2}
+.dashboard-page #items .item>p:nth-of-type(1),.dashboard-page #items .item>p:nth-of-type(2){font-size:.75rem;color:#455f86;margin:0}
+.dashboard-page #items .item>blockquote{font-size:.83rem;line-height:1.9;padding:16px;margin:0;border:1px solid #d6e2f6;border-radius:8px;background:#eff5ff;color:#435f8e;min-width:0}
+.dashboard-page #items .item>blockquote:nth-of-type(1){grid-column:1;grid-row:3;background:#fff8ec;border-color:#edddba;color:#806b42}
+.dashboard-page #items .item>blockquote:nth-of-type(2){grid-column:2;grid-row:3}
+.dashboard-page #items .item>p:last-child{grid-column:1/-1;font-size:.82rem;line-height:1.9;padding:16px 0 0;margin:6px 0 0;border-top:1px solid #dbe5f4;color:#455f86}
+.dashboard-page .share-context-note{margin:0 0 22px;border:1px solid #c6d8f7;background:#edf4ff;border-radius:9px;padding:16px 18px}
+.dashboard-page .share-context-note strong{font-size:.82rem;font-weight:550;color:#3c5e98}
+.dashboard-page .share-context-note p{font-size:.75rem;line-height:1.9;color:#455f86;margin:5px 0 0}
+.editor-title-field{margin:0 0 22px}
+.dashboard-page .editor-title-field label{margin:0 0 8px;font-size:.8rem;color:#455f86}
+.dashboard-page .editor-title-field input{font-size:1rem;font-weight:500;letter-spacing:-.02em;background:#f9fbff;border-color:var(--input-border);padding:13px 15px}
+.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;margin-bottom:20px}
+.editor-group{min-width:0;margin:0;padding:16px 18px 20px;border:1px solid #cfdcf3;border-radius:10px;background:#f8faff}
+.editor-group legend{font-size:.75rem;font-weight:550;color:#455f86;padding:5px 9px;border:1px solid #ccdcf7;border-radius:6px;background:#edf4ff}
+.dashboard-page .editor-group label{font-size:.8rem;color:#4f6b99;margin:14px 0 8px}
+.dashboard-page .editor-group label:first-of-type{margin-top:5px}
+.dashboard-page .editor-group input,.dashboard-page .editor-group textarea{background:#fff;border:1px solid var(--input-border);border-radius:8px;font-size:.85rem;line-height:1.9;padding:11px 12px}
+.dashboard-page .editor-group small{display:block;font-size:.75rem;line-height:1.9;color:#455f86;margin-top:8px}
+.editor-change-group{background:#f2f7ff}
+.editor-fee-card{display:flex;align-items:center;justify-content:space-between;gap:22px;border:1px solid #bfd2f5;border-radius:10px;background:linear-gradient(120deg,#edf4ff,#f8fbff);padding:20px;margin:0 0 20px}
+.dashboard-page .editor-fee-card label{font-size:.88rem;font-weight:550;color:#3b5b92;margin:0 0 6px}
+.dashboard-page .editor-fee-card small{font-size:.75rem;line-height:1.8;color:#455f86}
+.dashboard-page .editor-fee-card input{width:180px;flex-shrink:0;font-size:1.15rem;letter-spacing:-.03em;border-color:var(--input-border);background:#fff;padding:12px 14px}
+.dashboard-page #draft .check{background:#f4f8ff;border:1px solid #d2dff4;border-radius:9px;font-size:.8rem;line-height:1.9;color:#455f86;padding:16px;margin:0 0 18px}
+.editor-publish-bar{display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid #dce5f3;padding-top:18px}
+.editor-publish-bar .notice{font-size:.75rem;line-height:1.9;max-width:410px;margin:0}
+.dashboard-page .editor-publish-bar #publish{margin:0;white-space:nowrap;padding:12px 16px;font-size:.8rem;border-radius:9px;box-shadow:0 5px 16px #173bd118}
+.receipt-page .client-main{max-width:1020px;padding:32px 28px 58px}
+.receipt-page .client-main>.eyebrow{font-size:.75rem;letter-spacing:.05em;color:#455f86;margin-bottom:12px}
+.receipt-page .client-main>h1{font-size:2.25rem;font-weight:500;line-height:1.25;letter-spacing:-.05em;max-width:680px;margin-bottom:16px}
+.receipt-page .client-main>p{font-size:.9rem;line-height:1.9;color:#455f86}
+.receipt-page .client-main>.sandbox-note{font-size:.76rem;border-radius:9px;background:#edf4ff;border-color:#ccddf8;color:#455f86;margin:22px 0}
+.receipt-page #proposal{border:1px solid #cbdaf2;border-radius:18px;background:#ffffffed;box-shadow:0 15px 44px #234b9509;padding:36px}
+.receipt-page .receipt-heading{border-color:#bdcfee;padding-bottom:24px}
+.receipt-page .receipt-heading h2{font-size:1.65rem;font-weight:500;letter-spacing:-.04em;line-height:1.4}
+.receipt-page .receipt-date{font-size:.76rem;color:#455f86}
+.receipt-page .receipt-date time{font-weight:500;color:#455f86}
+.receipt-page #document-kind{font-size:.75rem;letter-spacing:.04em;color:#455f86}
+.receipt-page .scope-before,.receipt-page .scope-after{border-radius:10px;padding:22px;background:#f7faff;border-color:#d0dff5}
+.receipt-page .scope-after{background:#edf4ff;border-color:#bdd3f6}
+.receipt-page .receipt-step{font-family:"Google Sans",Arial,sans-serif;font-size:.75rem;letter-spacing:.035em;color:#455f86}
+.receipt-page .client-main h3{font-size:.95rem;font-weight:550;letter-spacing:-.02em;color:#3d5b8c}
+.receipt-page .proposal-text{font-size:.9rem;line-height:1.95;color:#455f86}
+.receipt-page .effort-section{background:#eff5ff;border:1px solid #d1e0f7;border-left:3px solid #6b91db;border-radius:10px;padding:22px}
+.receipt-page .receipt-caption{font-size:.75rem;line-height:1.9;color:#455f86}
+.receipt-page .delivery-section,.receipt-page .cost-section{border-color:#bdcfee}
+.receipt-page .cost-lines>div{border-color:#dce6f6;padding:16px 0}
+.receipt-page .cost-lines dt{font-size:.85rem;color:#4b6998}
+.receipt-page .cost-lines dt small{font-size:.75rem;color:#455f86}
+.receipt-page .cost-lines dd{font-size:.9rem;color:#3c5a8d;font-weight:500}
+.receipt-page .receipt-total{background:linear-gradient(120deg,#e5efff,#f0f6ff);border-color:#b8cff5;border-radius:12px;padding:22px}
+.receipt-page .receipt-total span{font-size:.95rem;font-weight:550;color:#3c5c92}
+.receipt-page .receipt-total small{font-size:.75rem;color:#455f86}
+.receipt-page .receipt-total strong{font-size:1.8rem;font-weight:500;letter-spacing:-.05em;color:#173bd1}
+.receipt-page #checkout-form .check{background:#f3f8ff;border-color:#d0e0f7;border-radius:10px;font-size:.82rem;line-height:1.9;color:#455f86;padding:18px}
+.receipt-page #pay{border-radius:9px;background:#173bd1;border-color:#173bd1;box-shadow:0 5px 18px #173bd119;padding:14px 18px;font-size:.84rem}
+.receipt-page #check-status{font-size:.78rem;border-radius:8px;padding:9px 13px;background:#f5f9ff;border-color:#c7d9f6;color:#455f86}
+.receipt-page #checkout-notice{font-size:.78rem;color:#455f86;line-height:1.9}
+@media(max-width:1200px){.editor-grid{grid-template-columns:1fr}.editor-publish-bar{align-items:flex-start;flex-direction:column}.editor-publish-bar .notice{max-width:none}}
+@media(max-width:850px){.glass-theme .auth-layout{gap:26px;padding:26px 24px 46px}.glass-theme .auth-story{padding:30px 24px;min-height:490px}.glass-theme .auth-story h1{font-size:2.1rem}.glass-theme .auth-card{padding:28px}.glass-theme .auth-card h2{font-size:1.7rem}}
+@media(max-width:620px){.glass-theme .auth-layout{grid-template-columns:1fr;padding:20px 16px 38px;gap:22px;min-height:0}.glass-theme .auth-story{min-height:0;padding:28px 24px;border-radius:16px;background-position:70% center}.glass-theme .auth-story h1{font-size:2rem}.glass-theme .auth-story>p{font-size:.83rem}.glass-theme .auth-story>.badge{margin-bottom:18px}.glass-theme .auth-steps{display:none}.glass-theme .auth-story>.notice{margin-top:18px;font-size:.75rem}.glass-theme .auth-card{padding:26px 22px;border-radius:16px}.glass-theme .auth-card h2{font-size:1.7rem}.dashboard-page #comparison,.dashboard-page #draft{padding:20px}.dashboard-page #items .item{grid-template-columns:1fr;padding:16px;gap:8px}.dashboard-page #items .item>p:nth-of-type(1){grid-column:1;grid-row:2}.dashboard-page #items .item>blockquote:nth-of-type(1){grid-column:1;grid-row:3}.dashboard-page #items .item>p:nth-of-type(2){grid-column:1;grid-row:4;margin-top:8px}.dashboard-page #items .item>blockquote:nth-of-type(2){grid-column:1;grid-row:5}.dashboard-page #items .item>p:last-child{grid-column:1;grid-row:6}.editor-group{padding:14px 15px 18px}.editor-fee-card{align-items:flex-start;flex-direction:column;gap:14px;padding:18px}.dashboard-page .editor-fee-card input{width:100%}.editor-publish-bar{gap:16px}.dashboard-page .editor-publish-bar #publish{width:100%;white-space:normal}.receipt-page .client-main{padding:22px 16px 40px}.receipt-page .client-main>h1{font-size:1.9rem}.receipt-page #proposal{padding:22px;border-radius:14px}.receipt-page .receipt-heading h2{font-size:1.4rem}.receipt-page .scope-before,.receipt-page .scope-after,.receipt-page .effort-section{padding:18px}.receipt-page .receipt-total{padding:18px}.receipt-page .receipt-total strong{font-size:1.65rem}}

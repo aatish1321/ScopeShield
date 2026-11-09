@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&amp;display=swap">
   <link rel="stylesheet" href="/glass.css">
   <link rel="stylesheet" href="/receipt.css">
+  <link rel="stylesheet" href="/flows.css">
 </head>
 <body class="glass-theme dashboard-page">
   <div class="app-shell">
@@ -68,26 +69,26 @@
         <p class="eyebrow">02 / DEFINE THE EXTRA WORK</p><h2 id="draft-title">Your proposal, your terms.</h2>
         <p id="review-warning">You decide what is extra, what it costs, and when it will be delivered.</p>
         <form id="draft-form">
-          <label for="title">Proposal title</label>
-          <input id="title" maxlength="160" required>
           <div class="share-context-note"><strong>These details will be visible to your client.</strong><p>Share only the relevant original scope and your reviewed explanation. The full agreement and raw AI analysis stay private.</p></div>
-          <label for="original-scope">Original scope · client-facing summary</label>
-          <textarea id="original-scope" rows="4" maxlength="4000" required placeholder="For example: A three-page website with Home, About, Contact, a contact form, and one revision round."></textarea>
-          <label for="original-amount">Original agreed fee (USD, optional)</label>
-          <input id="original-amount" type="text" inputmode="decimal" maxlength="12" placeholder="600.00" aria-describedby="original-amount-help">
-          <small id="original-amount-help">Reference only. This checkout charges only the additional work below. Enter the original fee yourself; AI does not extract it.</small>
-          <label for="work">What is being added</label>
-          <textarea id="work" rows="5" maxlength="10000" required></textarea>
-          <label for="change-reason">Why this requires additional effort</label>
-          <textarea id="change-reason" rows="4" maxlength="4000" required placeholder="Explain the extra implementation, testing, or coordination this change requires. Include effort estimates only if you can support them."></textarea>
-          <label for="amount">Additional work fee (USD)</label>
-          <input id="amount" type="text" inputmode="decimal" maxlength="12" placeholder="250.00" aria-describedby="amount-help" required>
-          <small id="amount-help">Enter your price in US dollars. No currency conversion.</small>
-          <label for="delivery">Delivery change</label>
-          <textarea id="delivery" rows="2" maxlength="1000" placeholder="For example, three additional working days." required></textarea>
+          <div class="editor-title-field"><label for="title">Proposal title</label><input id="title" maxlength="160" required placeholder="Give this change a clear, descriptive title."></div>
+          <div class="editor-grid">
+            <fieldset class="editor-group"><legend>01 / Original agreement</legend>
+              <label for="original-scope">Original scope · client-facing summary</label>
+              <textarea id="original-scope" rows="5" maxlength="4000" required placeholder="For example: A three-page website with Home, About, Contact, a contact form, and one revision round."></textarea>
+              <label for="original-amount">Original agreed fee (USD, optional)</label>
+              <input id="original-amount" type="text" inputmode="decimal" maxlength="12" placeholder="600.00" aria-describedby="original-amount-help">
+              <small id="original-amount-help">Reference only. This checkout charges only the additional work. Enter the original fee yourself; AI does not extract it.</small>
+            </fieldset>
+            <fieldset class="editor-group editor-change-group"><legend>02 / Additional work</legend>
+              <label for="work">What is being added</label><textarea id="work" rows="4" maxlength="10000" required></textarea>
+              <label for="change-reason">Why this requires additional effort</label>
+              <textarea id="change-reason" rows="4" maxlength="4000" required placeholder="Explain the extra implementation, testing, or coordination. Include effort estimates only if you can support them."></textarea>
+              <label for="delivery">Delivery change</label><textarea id="delivery" rows="2" maxlength="1000" placeholder="For example, three additional working days." required></textarea>
+            </fieldset>
+          </div>
+          <div class="editor-fee-card"><div><label for="amount">Additional work fee (USD)</label><small id="amount-help">The amount your client pays for this change. No currency conversion.</small></div><input id="amount" type="text" inputmode="decimal" maxlength="12" placeholder="250.00" aria-describedby="amount-help" required></div>
           <label class="check"><input id="reviewed" type="checkbox" required> I have reviewed the shared original scope, explanation, work, fees, and delivery change and approve these client-facing terms.</label>
-          <p class="notice">Published terms are fixed. Anyone with the client link can view them. Correct mistakes by publishing a new proposal.</p>
-          <button id="publish" type="submit">Approve and publish proposal</button>
+          <div class="editor-publish-bar"><p class="notice">Published terms are fixed. Anyone with the client link can view them. Correct mistakes by publishing a new proposal.</p><button id="publish" type="submit">Approve and publish proposal ↗</button></div>
         </form>
       </section>
       </div>
