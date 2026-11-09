@@ -10,24 +10,26 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&amp;display=swap">
   <link rel="stylesheet" href="/glass.css">
   <link rel="stylesheet" href="/receipt.css">
-  <link rel="stylesheet" href="/flows.css">
 </head>
 <body class="glass-theme receipt-page">
   <header class="topbar"><a class="brand" href="/" aria-label="ScopeShield home"><img class="brand-logo" src="/assets/scopeshield-logo.png" alt="" width="44" height="48"><span>ScopeShield<span class="brand-dot">.</span></span></a><span class="badge">CHANGE ORDER</span></header>
   <main class="client-main">
-    <p class="eyebrow">EXTRA WORK, EXPLAINED CLEARLY</p>
-    <h1>A clear record of the change.</h1>
-    <p>See what was agreed, what is being added, and the extra fee before you accept.</p>
-    <p class="sandbox-note">PayPal sandbox checkout · No real funds move · No ScopeShield account needed</p>
+    <div class="client-intro"><div><p class="eyebrow">YOUR PROJECT / CHANGE ORDER</p><h1>Extra work.<br>Clear terms.</h1><p>Review the change, agree on the fee, and keep your project moving.</p></div><span class="client-sandbox">PayPal sandbox<span>No real funds move</span></span></div>
     <p id="status" role="status" aria-live="polite">Loading proposal…</p>
     <section id="proposal" aria-labelledby="title" hidden>
       <div class="receipt-heading"><div><p class="eyebrow" id="document-kind">CHANGE ORDER · NOT A PAYMENT RECEIPT</p><h2 id="title"></h2></div><div class="receipt-date"><span>Published</span><time id="issued-at"></time></div></div>
+      <div class="receipt-layout">
+      <div class="receipt-document">
+      <div class="document-section-title"><span>THE SCOPE</span><span>Before → After</span></div>
       <div class="scope-comparison">
         <div class="scope-before"><span class="receipt-step">01 / ORIGINAL AGREEMENT</span><h3>What was already agreed</h3><p id="original-scope" class="proposal-text"></p></div>
         <div class="scope-after"><span class="receipt-step">02 / ADDITIONAL WORK</span><h3>What this proposal adds</h3><p id="work" class="proposal-text"></p></div>
       </div>
       <div class="effort-section"><span class="receipt-step">03 / REASON FOR THE CHANGE FEE</span><h3>Why this adds work</h3><p id="change-reason" class="proposal-text"></p><p class="receipt-caption">Explanation reviewed by your freelancer. Ask them about anything that needs clarification before accepting.</p></div>
       <div class="delivery-section"><h3>Delivery change</h3><p id="delivery" class="proposal-text"></p></div>
+      <p class="document-footnote">Fixed terms, reviewed by your freelancer. Contact them to discuss a change before accepting.</p>
+      </div>
+      <aside class="receipt-sidebar" aria-label="Fee and checkout">
       <div class="cost-section"><h3>Cost summary</h3><dl class="cost-lines">
         <div id="original-cost-row" hidden><dt>Original agreed fee <small>Reference only · not collected here</small></dt><dd id="original-cost"></dd></div>
         <div><dt>Additional work fee <small>Covers the additions listed above</small></dt><dd id="change-cost"></dd></div>
@@ -41,7 +43,9 @@
         <button id="pay" type="submit">Accept and continue to PayPal sandbox</button>
       </form>
       <button id="check-status" type="button" hidden>Check payment status</button>
-      <p class="notice">These are fixed terms reviewed by your freelancer. Contact them about any changes. Anyone with this link can view this proposal; share it only with intended recipients.</p>
+      <p class="notice">No ScopeShield account needed. Anyone with this link can view the proposal; share it only with intended recipients.</p>
+      </aside>
+      </div>
     </section>
   </main><footer>ScopeShield · Fixed terms. Clear expectations. <a href="/">Learn about ScopeShield</a></footer>
 </body>
