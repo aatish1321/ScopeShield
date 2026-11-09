@@ -16,9 +16,9 @@ A freelancer agreed to build a three-page website. The client then asks for a te
 
 1. Paste the original agreement and the client's new request.
 2. Groq classifies the request as potential additional work, already included, or unclear, with source excerpts and an explanation.
-3. The freelancer edits the added work, USD price, and delivery change, then explicitly approves publication.
-4. A private, unguessable client link shows only those fixed terms.
-5. The client accepts the proposal and approves payment in PayPal sandbox.
+3. The freelancer reviews the shareable original scope, added work, reason for the extra effort, USD fee, and delivery change, then explicitly approves publication. An optional original fee gives context without adding to the checkout charge.
+4. An unguessable client link shows a receipt-style change order: original scope, additions, effort explanation, cost summary, and delivery change. Anyone holding this link can view those fixed terms.
+5. The client accepts the change order and approves payment for the additional work only in PayPal sandbox.
 6. The server captures the stored order and verifies PayPal's order, merchant, reference, amount, currency, and capture status before showing **Paid** and the transaction reference.
 
 AI does not set binding prices, promise delivery dates, send messages, or charge clients automatically. A freelancer reviews its interpretation and makes those decisions.
@@ -27,7 +27,7 @@ AI does not set binding prices, promise delivery dates, send messages, or charge
 
 | Check | Evidence |
 | --- | --- |
-| Automated behavior and security checks | `npm test`: 56 passing tests, including the complete HTTP payment journey with mocked PayPal responses |
+| Automated behavior and security checks | Previous full run: 56 passing tests. Latest change-order update: 48 non-HTTP/static checks pass; HTTP tests await rerun outside the restricted sandbox. Payment tests use mocked PayPal responses |
 | Real Groq access | Synthetic additional, included, and unclear cases exercised successfully, including the multiline website/store example |
 | Persistence | A published synthetic proposal and its original client link survived an actual application restart |
 | Real PayPal sandbox access | OAuth, order creation, and order retrieval passed; stored USD amount, reference, merchant, and approval destination verified |
@@ -104,7 +104,7 @@ For buyer checkout, use **Testing Tools → Sandbox Accounts** to obtain the ema
 
 1. Create an account or log in to the freelancer workspace and click **Load website example**. This loads synthetic text, not a canned AI result.
 2. Click **Analyze request**. Inspect the classification, quoted source evidence, and explanation from a real Groq call.
-3. Edit the proposal: title `Add a ten-product store`, work `Product catalog, shopping cart, PayPal checkout, and product management`, price `250.00`, delivery change `Five additional working days`.
+3. Review the shareable original scope and the explanation for the additional work. Enter the original fee `600.00` if desired (reference only). Edit the proposal: title `Add a ten-product store`, work `Product catalog, shopping cart, PayPal checkout, and product management`, price `250.00`, delivery change `Five additional working days`.
 4. Check the freelancer review confirmation and click **Approve and publish proposal**.
 5. Open the resulting client link in a separate browser or private window on the same computer. It requires no ScopeShield login and shows only approved terms.
 6. Check the client acceptance box, then continue to PayPal sandbox. Sign in with the separate sandbox buyer account and approve the payment.
@@ -119,6 +119,22 @@ For cancellation, publish another synthetic proposal, start checkout, and cancel
 To exercise other AI outcomes, request a contact form already included in the agreement, or ask for an unnamed feature from an unavailable prior discussion. Expected outcomes are **included** and **unclear**, respectively; all AI interpretations remain subject to human review.
 
 Localhost links work only on the computer running the server. To let remote users follow a link, deploy behind HTTPS with the correct `APP_URL` and a persistent database volume; this repository does not provision hosting.
+
+## Client change order and cost summary
+
+Before publishing, review the **Original scope** and **Why this requires additional effort** fields. The editor suggests source excerpts and an explanation from the comparison; these must be edited or confirmed for the client. A missing agreement excerpt requires you to write the relevant scope yourself. Do not publish confidential clauses or unsupported time/effort claims.
+
+The client sees the original scope beside the additions, the reviewed effort explanation, delivery change, and a clear cost summary. The original agreed fee is optional and entered by the freelancer; it is reference information, not proof of an earlier payment. The revised project value is displayed only when that fee is supplied. **Checkout always collects only the additional fee.** For example, an original fee of $600 and an extra fee of $250 shows a revised project value of $850, while the PayPal order remains $250.
+
+An unpaid change order is explicitly labeled **not a payment receipt**. Only a verified paid record shows a PayPal sandbox receipt and transaction reference. New context fields are immutable after publication. Existing proposals retain their original terms and payment references; missing historic scope/fee/explanation is shown honestly rather than invented. Restart the server after updating, then publish a new proposal to use these fields.
+
+## Interface and dashboard
+
+The landing page walks through agreement input, AI comparison, reviewed publication, and client checkout. The supplied application capture is labeled as an actual screenshot; other visual examples are explicitly labeled illustrative. No preview is a live payment receipt.
+
+The dashboard uses your current, non-deleted proposals for totals and payment-state counts. Charts show publication activity over seven UTC calendar days and cumulative confirmed sandbox collections over thirty UTC calendar days. Deleting a proposal removes it from these widgets; they are a workspace overview, not an accounting ledger. Status remains the last saved PayPal state until refreshed through **Check payment status**.
+
+The interface uses a light gray background, off-white glass cards, navy navigation, and restrained lime accents. Google Sans, the floating pill navigation, and animated waves remain. Wave colors and shadows are softened to preserve readable content; both waves and the ambient gradient stop when reduced motion is enabled. Nearly opaque panels keep the animated background from reducing text contrast. Google Sans loads through Google Fonts, with an Arial/system sans-serif fallback if unavailable; the browser makes font requests to Google. The animated background stops when reduced motion is requested, and the forms, publication controls, and client checkout retain their existing behavior. No chart library, browser storage, or additional runtime dependency was added.
 
 ## How PayPal and AI are used
 
@@ -144,7 +160,7 @@ The UI uses plain HTML/CSS/JavaScript. Express is the only installed runtime dep
 - Secrets stay in server-side `.env`. `.gitignore` excludes environment variants, runtime databases/journals, private keys, dependencies, and local workflow files. Only `.env.example` with blank credential fields is committed. Ignore rules do not remove previously tracked files; staged contents must also be reviewed.
 - Passwords use independently salted scrypt hashes (`N=32768, r=8, p=3`), with bounded concurrent hashing. Plaintext passwords are never stored. These parameters follow the [OWASP scrypt guidance](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#scrypt).
 - Login uses a random, eight-hour, server-managed session. The server stores a hash of the session token; its cookie is HttpOnly, SameSite=Strict, and Secure over configured HTTPS. Logout or server restart invalidates the session.
-- No localStorage or sessionStorage is used. Unpublished agreement text, analysis, and draft edits remain in page memory and clear on reload/logout. Accounts, published terms, and payment metadata persist in `data/scopeshield.sqlite`; the app does not retain the original agreement/request or raw AI analysis in that database.
+- No localStorage or sessionStorage is used. Unpublished agreement text, analysis, and draft edits remain in page memory and clear on reload/logout. Accounts, published terms, and payment metadata persist in `data/scopeshield.sqlite`. The reviewed client-facing original scope and effort explanation are part of those terms; the private source agreement/request and full raw AI comparison are not retained in the database.
 - Groq receives submitted document text for analysis. Use synthetic data for evaluation and review [Groq's data policy](https://console.groq.com/docs/your-data) before supplying confidential client material.
 - Only `public/` is web-served. Environment files, source, Git metadata, database files, and local plans are not accessible over HTTP. The local `.env` and database use `0600` permissions; the data directory uses `0700`.
 - Workspace APIs require an unexpired account session. Proposal listing and deletion are scoped to the session’s user; client-supplied owner identifiers are ignored. State-changing requests require the exact configured Origin and JSON content type. Host checks resist DNS rebinding; proxy headers are not trusted. Signup, login, analysis, publishing, and payment operations are throttled. Limits are per connecting IP; behind a reverse proxy this may share limits across users because proxy headers are not trusted.
@@ -161,7 +177,7 @@ These are implemented and tested prototype controls, not a guarantee of producti
 npm test
 ```
 
-The 56 checks cover authentication, session expiry/logout, CSRF/origin checks, private-file isolation, safe text rendering, input/evidence validation, exact money parsing, immutable terms, restart persistence, client/workspace and cross-account isolation, acceptance, payment idempotency, concurrent requests, timeouts, pending/failed/completed states, amount/currency/reference/merchant mismatches, and owner-only deletion with retained records, deactivated links and payment-race protection.
+The checks cover authentication, session expiry/logout, CSRF/origin checks, private-file isolation, safe text rendering, input/evidence validation, exact money parsing, immutable terms, restart persistence, client/workspace and cross-account isolation, acceptance, payment idempotency, concurrent requests, timeouts, pending/failed/completed states, amount/currency/reference/merchant mismatches, and owner-only deletion with retained records, deactivated links and payment-race protection.
 
 Automated Groq/PayPal responses are mocked. The verification table above distinguishes these tests from actual external API checks.
 

@@ -54,7 +54,8 @@ function fakePayPal() {
 function setup(t) {
   const store = openStore(':memory:');
   t.after(() => store.close());
-  const row = store.create({ title: 'Store addition', work: 'Ten products', delivery: 'Five days', amountCents: 25000 });
+  const row = store.create({ title: 'Store addition', work: 'Ten products', delivery: 'Five days', amountCents: 25000,
+    originalScope: 'Three-page website', changeReason: 'Adds catalog and checkout implementation and testing.', originalAmountCents: 60000 });
   const fake = fakePayPal();
   let time = Date.parse('2026-10-20T12:00:00Z');
   const now = () => time;

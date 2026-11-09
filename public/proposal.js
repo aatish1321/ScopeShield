@@ -26,8 +26,21 @@ async function api(action, body) {
 function render(proposal) {
   $('title').textContent = proposal.title;
   $('work').textContent = proposal.work;
+  $('original-scope').textContent = proposal.originalScope || 'The original scope was not recorded with this older proposal. Ask your freelancer for the relevant agreement before accepting.';
+  $('change-reason').textContent = proposal.changeReason || 'An explanation was not recorded with this older proposal. Ask your freelancer how the added work affects the fee and delivery.';
+  $('issued-at').textContent = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(proposal.createdAt));
+  $('issued-at').dateTime = proposal.createdAt;
   $('delivery').textContent = proposal.delivery;
-  $('amount').textContent = `${new Intl.NumberFormat('en-US', { style: 'currency', currency: proposal.currency }).format(proposal.amountCents / 100)} ${proposal.currency}`;
+  const money = cents => `${new Intl.NumberFormat('en-US', { style: 'currency', currency: proposal.currency }).format(cents / 100)} ${proposal.currency}`;
+  $('amount').textContent = money(proposal.amountCents);
+  $('change-cost').textContent = money(proposal.amountCents);
+  const hasOriginalCost = Number.isSafeInteger(proposal.originalAmountCents) && proposal.originalAmountCents > 0;
+  $('original-cost-row').hidden = !hasOriginalCost;
+  $('project-total-row').hidden = !hasOriginalCost;
+  $('original-cost').textContent = hasOriginalCost ? money(proposal.originalAmountCents) : '';
+  $('project-total').textContent = hasOriginalCost ? money(proposal.originalAmountCents + proposal.amountCents) : '';
+  $('document-kind').textContent = proposal.status === 'paid' ? 'CHANGE ORDER · PAYPAL SANDBOX PAYMENT RECEIPT' : 'CHANGE ORDER · NOT A PAYMENT RECEIPT';
+  $('amount-label').textContent = proposal.status === 'paid' ? 'Paid for this change' : 'Amount for this change';
   $('payment-status').textContent = labels[proposal.status] || 'Payment status unconfirmed. Contact your freelancer.';
   $('receipt').hidden = !proposal.captureId;
   $('receipt').textContent = proposal.captureId ? `PayPal sandbox transaction: ${proposal.captureId}` : '';

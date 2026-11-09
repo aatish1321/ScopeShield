@@ -27,6 +27,9 @@ export function validateProposal(body) {
   return {
     title: requiredText(body.title, 'Proposal title', 160),
     work: requiredText(body.work, 'Additional work', 10000),
+    originalScope: requiredText(body.originalScope, 'Shareable original scope', 4000),
+    changeReason: requiredText(body.changeReason, 'Reason for the additional work', 4000),
+    originalAmountCents: body.originalAmount === undefined || body.originalAmount === '' ? null : parseAmount(body.originalAmount),
     delivery: requiredText(body.delivery, 'Delivery change', 1000),
     amountCents: parseAmount(body.amount),
   };

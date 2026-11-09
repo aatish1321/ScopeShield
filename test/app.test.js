@@ -14,6 +14,7 @@ import { hashPassword } from '../src/auth.js';
 const password = 'synthetic test passphrase for accounts';
 const account = { email: 'owner@example.test', password };
 const passwordHash = await hashPassword(password);
+const changeContext = { originalScope: 'Three-page website', changeReason: 'Adds product catalog and checkout implementation and testing.', originalAmount: '600.00' };
 const input = { agreement: 'Build three pages.', newRequest: 'Add a store.' };
 const result = {
   classification: 'additional', summary: '<img src=x onerror=alert(1)>',
@@ -123,6 +124,9 @@ test('headers and static allowlist protect environment, plans, database, source 
   assert.equal(home.headers.get('x-content-type-options'), 'nosniff');
   assert.equal(home.headers.get('x-frame-options'), 'DENY');
   assert.match(home.headers.get('content-security-policy'), /frame-ancestors 'none'/);
+  assert.match(home.headers.get('content-security-policy'), /style-src 'self' https:\/\/fonts\.googleapis\.com/);
+  assert.match(home.headers.get('content-security-policy'), /font-src 'self' https:\/\/fonts\.gstatic\.com/);
+  assert.doesNotMatch(home.headers.get('content-security-policy'), /unsafe-inline|unsafe-eval/);
   assert.equal(home.headers.get('x-powered-by'), null);
   for (const path of ['/.env', '/.env.example', '/.git/config', '/src/server.js', '/devpost/spec.md', '/data/scopeshield.sqlite', '/package.json']) {
     const response = await request(path);
@@ -185,12 +189,12 @@ test('server restart invalidates sessions', async t => {
 
 test('only a signed-in freelancer can publish/list; client sees immutable approved fields', async t => {
   const { request, login } = await start(t);
-  const terms = { title: '<script>Store</script>', work: 'Add a store', delivery: 'Five extra days', amount: '250.00', reviewed: true,
+  const terms = { ...changeContext, title: '<script>Store</script>', work: 'Add a store', delivery: 'Five extra days', amount: '250.00', reviewed: true,
     agreement: 'private agreement text', analysis: 'internal reasoning', amountCents: 1, currency: 'EUR' };
   assert.equal((await request('/api/proposals')).status, 401);
   assert.equal((await request('/api/proposals', terms)).status, 401);
   const cookie = await login();
-  assert.equal((await request('/api/proposals', { ...terms, reviewed: false }, { cookie })).status, 400);
+  assert.equal((await request('/api/proposals', { ...changeContext, ...terms, reviewed: false }, { cookie })).status, 400);
   const published = await request('/api/proposals', terms, { cookie });
   assert.equal(published.status, 201);
   const proposal = await published.json();
@@ -201,6 +205,9 @@ test('only a signed-in freelancer can publish/list; client sees immutable approv
   assert.equal(client.status, 200);
   const publicView = await client.json();
   assert.equal(publicView.work, terms.work);
+  assert.equal(publicView.originalScope, changeContext.originalScope);
+  assert.equal(publicView.changeReason, changeContext.changeReason);
+  assert.equal(publicView.originalAmountCents, 60000);
   assert.equal(publicView.title, terms.title);
   assert.equal(publicView.status, 'unpaid');
   for (const field of ['id', 'token', 'agreement', 'analysis', 'owner_key', 'order_id', 'create_request_id']) assert.ok(!Object.hasOwn(publicView, field));
@@ -222,7 +229,7 @@ test('published client link survives app/store reopen and owner logout', async t
   await t.test('publish', async t => {
     const { request, login } = await start(t, { store: openStore(path) });
     const cookie = await login();
-    const response = await request('/api/proposals', { reviewed: true, title: 'Store', work: 'Ten products', amount: '250', delivery: 'Five days' }, { cookie });
+    const response = await request('/api/proposals', { ...changeContext, reviewed: true, title: 'Store', work: 'Ten products', amount: '250', delivery: 'Five days' }, { cookie });
     assert.equal(response.status, 201);
     token = (await response.json()).token;
     await request('/api/logout', {}, { cookie });
@@ -240,7 +247,7 @@ test('only the proposal owner can delete; deleted proposals disappear and client
   let externalCalls = 0;
   const { request, login } = await start(t, { payments: true, fetchApi: async () => { externalCalls++; throw new Error('Unexpected provider call'); } });
   const cookie = await login();
-  const saved = await request('/api/proposals', { reviewed: true, title: 'Store', work: 'Ten products', amount: '250', delivery: 'Five days' }, { cookie });
+  const saved = await request('/api/proposals', { ...changeContext, reviewed: true, title: 'Store', work: 'Ten products', amount: '250', delivery: 'Five days' }, { cookie });
   const { token } = await saved.json();
   assert.equal((await request(`/api/proposals/${token}/delete`, {})).status, 401);
   assert.equal((await request(`/api/proposals/${token}/delete`, {}, { cookie, headers: { Origin: 'https://attacker.example' } })).status, 403);
@@ -274,7 +281,7 @@ test('HTTP payment journey ignores browser amounts/order IDs and records payment
     return new Response(JSON.stringify(order));
   } });
   const cookie = await login();
-  const published = await request('/api/proposals', { title: 'Store', work: 'Ten products', delivery: 'Five days', amount: '250', reviewed: true }, { cookie });
+  const published = await request('/api/proposals', { ...changeContext, title: 'Store', work: 'Ten products', delivery: 'Five days', amount: '250', reviewed: true }, { cookie });
   const { token } = await published.json();
   assert.equal((await request(`/api/proposals/${token}/capture`, {})).status, 409);
   assert.equal((await request(`/api/proposals/${token}/checkout`, { accepted: false })).status, 400);
@@ -308,7 +315,7 @@ test('signup creates a private account; another account cannot list/delete its p
   const { request, login, store } = await start(t);
   const legacy = store.create({ title: 'Old proposal', work: 'Preserved', delivery: 'Later', amountCents: 100 });
   const firstCookie = await login();
-  const created = await request('/api/proposals', { reviewed: true, title: 'Private workspace', work: 'Extra work', amount: '250', delivery: 'Five days', ownerId: 'forged' }, { cookie: firstCookie });
+  const created = await request('/api/proposals', { ...changeContext, reviewed: true, title: 'Private workspace', work: 'Extra work', amount: '250', delivery: 'Five days', ownerId: 'forged' }, { cookie: firstCookie });
   const proposal = await created.json();
   const signup = await request('/api/signup', { email: ' New@Example.test ', name: 'New Freelancer', password });
   assert.equal(signup.status, 201);

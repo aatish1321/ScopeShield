@@ -7,25 +7,36 @@
   <title>ScopeShield — Client proposal</title>
   <link rel="stylesheet" href="/styles.css">
   <script src="/proposal.js" defer></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&amp;display=swap">
+  <link rel="stylesheet" href="/glass.css">
+  <link rel="stylesheet" href="/receipt.css">
 </head>
-<body>
-  <header class="topbar"><a class="brand" href="/" aria-label="ScopeShield home"><img class="brand-logo" src="/assets/scopeshield-logo.png" alt="" width="44" height="48"><span>ScopeShield<span class="brand-dot">.</span></span></a><span class="badge">CLIENT PROPOSAL</span></header>
+<body class="glass-theme receipt-page">
+  <header class="topbar"><a class="brand" href="/" aria-label="ScopeShield home"><img class="brand-logo" src="/assets/scopeshield-logo.png" alt="" width="44" height="48"><span>ScopeShield<span class="brand-dot">.</span></span></a><span class="badge">CHANGE ORDER</span></header>
   <main class="client-main">
-    <p class="eyebrow">A CLEAR AGREEMENT FOR WHAT COMES NEXT</p>
-    <h1>Review. Agree. Move forward.</h1>
-    <p>Your freelancer has shared an additional work proposal.</p>
+    <p class="eyebrow">EXTRA WORK, EXPLAINED CLEARLY</p>
+    <h1>A clear record of the change.</h1>
+    <p>See what was agreed, what is being added, and the extra fee before you accept.</p>
     <p class="sandbox-note">PayPal sandbox checkout · No real funds move · No ScopeShield account needed</p>
     <p id="status" role="status" aria-live="polite">Loading proposal…</p>
     <section id="proposal" aria-labelledby="title" hidden>
-      <p class="eyebrow">ADDITIONAL WORK PROPOSAL</p><h2 id="title"></h2>
-      <h3>Additional work</h3><p id="work" class="proposal-text"></p>
-      <div class="split payment-summary"><div><h3>Total price</h3><p id="amount"></p>
-      </div><div><h3>Delivery change</h3><p id="delivery" class="proposal-text"></p>
-      </div></div><h3>Payment status</h3><p id="payment-status"></p>
-      <p id="receipt" hidden></p>
+      <div class="receipt-heading"><div><p class="eyebrow" id="document-kind">CHANGE ORDER · NOT A PAYMENT RECEIPT</p><h2 id="title"></h2></div><div class="receipt-date"><span>Published</span><time id="issued-at"></time></div></div>
+      <div class="scope-comparison">
+        <div class="scope-before"><span class="receipt-step">01 / ORIGINAL AGREEMENT</span><h3>What was already agreed</h3><p id="original-scope" class="proposal-text"></p></div>
+        <div class="scope-after"><span class="receipt-step">02 / ADDITIONAL WORK</span><h3>What this proposal adds</h3><p id="work" class="proposal-text"></p></div>
+      </div>
+      <div class="effort-section"><span class="receipt-step">03 / REASON FOR THE CHANGE FEE</span><h3>Why this adds work</h3><p id="change-reason" class="proposal-text"></p><p class="receipt-caption">Explanation reviewed by your freelancer. Ask them about anything that needs clarification before accepting.</p></div>
+      <div class="delivery-section"><h3>Delivery change</h3><p id="delivery" class="proposal-text"></p></div>
+      <div class="cost-section"><h3>Cost summary</h3><dl class="cost-lines">
+        <div id="original-cost-row" hidden><dt>Original agreed fee <small>Reference only · not collected here</small></dt><dd id="original-cost"></dd></div>
+        <div><dt>Additional work fee <small>Covers the additions listed above</small></dt><dd id="change-cost"></dd></div>
+        <div id="project-total-row" hidden><dt>Revised project value <small>Original fee + this change · not the amount due here</small></dt><dd id="project-total"></dd></div>
+      </dl><div class="receipt-total"><div><span id="amount-label">Amount for this change</span><small>This checkout covers additional work only.</small></div><strong id="amount"></strong></div>
+      <p class="receipt-caption">The original fee is shown only when supplied by your freelancer. It does not indicate whether the original agreement has been paid. Contact your freelancer to discuss any adjustment.</p></div>
+      <div class="receipt-payment"><h3>Payment status</h3><p id="payment-status"></p><p id="receipt" hidden></p></div>
       <p id="checkout-notice">This demo uses PayPal sandbox only. No real funds move.</p>
       <form id="checkout-form" hidden>
-        <label class="check"><input id="accepted" type="checkbox" required> I accept this proposal's work, price, and delivery change.</label>
+        <label class="check"><input id="accepted" type="checkbox" required> I have reviewed the original scope, additions, explanation, additional fee, and delivery change and accept this change order.</label>
         <button id="pay" type="submit">Accept and continue to PayPal sandbox</button>
       </form>
       <button id="check-status" type="button" hidden>Check payment status</button>

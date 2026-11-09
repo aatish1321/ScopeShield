@@ -30,7 +30,7 @@ export function createApp(config, { fetchApi = fetch, now = Date.now, store = op
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'DENY',
       'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-      'Content-Security-Policy': "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
+      'Content-Security-Policy': "default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
     });
     if (secure) res.set('Strict-Transport-Security', 'max-age=31536000');
     // Only the configured host is served, including on loopback, to resist DNS rebinding.
