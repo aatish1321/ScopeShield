@@ -27,13 +27,13 @@ AI does not set binding prices, promise delivery dates, send messages, or charge
 
 | Check | Evidence |
 | --- | --- |
-| Automated behavior and security checks | Previous full run: 56 passing tests. Latest dashboard update: 49 non-HTTP checks pass inside a disposable, network-isolated Bubblewrap runtime; HTTP tests still await dependency verification. Payment tests use mocked PayPal responses |
+| Automated behavior and security checks | Previous full run: 56 passing tests. Latest complete non-HTTP run: 49 checks passed inside a disposable, network-isolated Bubblewrap runtime; subsequent UI changes passed their targeted checks. HTTP tests still await dependency verification. Payment tests use mocked PayPal responses |
 | Real Groq access | Synthetic additional, included, and unclear cases exercised successfully, including the multiline website/store example |
 | Persistence | A published synthetic proposal and its original client link survived an actual application restart |
 | Real PayPal sandbox access | OAuth, order creation, and order retrieval passed; stored USD amount, reference, merchant, and approval destination verified |
 | Buyer approval and live sandbox capture | **Awaiting hands-on verification with a sandbox buyer**; automated capture tests use mocked responses |
 | Repository and licensing | Public GitHub repository; top-level MIT license recognized by GitHub |
-| Browser visual/keyboard review | Updated landing, account, workspace, and client layouts await hands-on browser review; no browser automation surface was available |
+| Browser visual/keyboard review | Desktop layout changes reviewed through user-supplied screenshots; automated browser, mobile, and keyboard review remains outstanding because no browser automation surface was available |
 
 The payment implementation is available for testing. The submission demo video has not been recorded yet. No real-money payment flow is enabled.
 
@@ -138,7 +138,27 @@ The interface uses off-white surfaces, ink text, and cobalt accents throughout. 
 
 ## How PayPal and AI are used
 
+### Tools and technology
+
+| Tool or technology | Role in ScopeShield |
+| --- | --- |
+| **PayPal developer sandbox — OAuth 2.0 and Orders v2 REST APIs** | Server authentication, sandbox order creation, buyer approval, capture, and payment-status reconciliation. Checkout collects only the published additional fee; no real funds move. |
+| **Groq API** | Runs the AI comparison of the agreement and new client request, returning a classification, source excerpts, explanation, and suggested work. |
+| **GPT-OSS 20B (`openai/gpt-oss-20b`)** | Default model served through Groq. The model can be changed with `GROQ_MODEL`; the application does not call the OpenAI API for scope analysis. |
+| **Node.js and Express** | HTTP server, account sessions, input validation, provider calls, and payment verification. |
+| **SQLite (`node:sqlite`)** | Persistent accounts, approved proposals, immutable terms, and payment references. |
+| **HTML, CSS, and JavaScript** | Landing page, login/signup, freelancer dashboard, proposal editor, and client change order. |
+| **Google Fonts — Google Sans** | Interface typography, with a system fallback. |
+| **OpenAI ImageGen** | Created the decorative cobalt artwork used in the interface. This is an asset creation tool, separate from the application's Groq analysis. |
+| **Codex** | Assisted development, interface iteration, documentation, and automated checks. |
+
+No additional hackathon sponsor service is integrated. PayPal handles the payment workflow, while Groq supplies the application's AI functionality. The prototype uses direct REST calls rather than a PayPal or Groq SDK.
+
+### AI comparison
+
 **Groq** performs the core agreement comparison through `POST /openai/v1/chat/completions`. The server supplies a strict JSON schema and treats both documents as untrusted input. It validates the response and source quotes, permitting whitespace-only differences. Invalid evidence gets one corrective attempt; repeatedly invalid output is rejected. This retry may consume an additional API request. No fake AI fallback exists in the application.
+
+### Sandbox payment integration
 
 **PayPal Orders v2** completes the proposal's payment workflow: server-side OAuth, create order, redirect for buyer approval, capture the stored order, and retrieve the order to reconcile its actual state. The sandbox API host is fixed in code. The browser cannot choose the charge amount, currency, merchant, or order ID. [Orders API documentation](https://developer.paypal.com/api/orders/v2/)
 
