@@ -9,6 +9,18 @@ test('configuration defaults to loopback and Groq strict-output model', () => {
   assert.equal(config.appUrl.origin, 'http://localhost:3000');
   assert.equal(config.groqModel, 'openai/gpt-oss-20b');
   assert.equal(config.port, 3000);
+  assert.equal(config.listenHost, '127.0.0.1');
+});
+
+test('hosted configuration uses the assigned IP while development stays on loopback', () => {
+  const production = { ...env, NODE_ENV: 'production', APP_URL: 'https://example.alwaysdata.net', PORT: '8100' };
+  assert.equal(loadConfig({ ...production, HOST: '127.0.0.2' }).listenHost, '127.0.0.2');
+  assert.equal(loadConfig({ ...production, IP: '::1' }).listenHost, '::1');
+  assert.equal(loadConfig({ ...production, HOST: '127.0.0.2', IP: '127.0.0.3' }).listenHost, '127.0.0.2');
+  assert.equal(loadConfig(production).listenHost, '127.0.0.1');
+  assert.equal(loadConfig(production).port, 8100);
+  assert.equal(loadConfig({ ...env, HOST: '0.0.0.0', IP: '127.0.0.2' }).listenHost, '127.0.0.1');
+  assert.throws(() => loadConfig({ ...production, HOST: 'untrusted.example' }), /HOST/);
 });
 
 test('missing or weak credentials fail closed without echoing values', () => {

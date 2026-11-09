@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "node --env-file=.env src/server.js",
+    "start:production": "node src/server.js",
     "test": "node --test"
   },
   "dependencies": {

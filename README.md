@@ -27,7 +27,7 @@ AI does not set binding prices, promise delivery dates, send messages, or charge
 
 | Check | Evidence |
 | --- | --- |
-| Automated behavior and security checks | Previous full run: 56 passing tests. Latest complete non-HTTP run: 49 checks passed inside a disposable, network-isolated Bubblewrap runtime; subsequent UI changes passed their targeted checks. HTTP tests still await dependency verification. Payment tests use mocked PayPal responses |
+| Automated behavior and security checks | Previous full run: 56 passing tests. Latest complete non-HTTP run: 50 checks passed inside a disposable, network-isolated Bubblewrap runtime; subsequent UI changes passed their targeted checks. HTTP tests still await dependency verification. Payment tests use mocked PayPal responses |
 | Real Groq access | Synthetic additional, included, and unclear cases exercised successfully, including the multiline website/store example |
 | Persistence | A published synthetic proposal and its original client link survived an actual application restart |
 | Real PayPal sandbox access | OAuth, order creation, and order retrieval passed; stored USD amount, reference, merchant, and approval destination verified |
@@ -118,7 +118,24 @@ For cancellation, publish another synthetic proposal, start checkout, and cancel
 
 To exercise other AI outcomes, request a contact form already included in the agreement, or ask for an unnamed feature from an unavailable prior discussion. Expected outcomes are **included** and **unclear**, respectively; all AI interpretations remain subject to human review.
 
-Localhost links work only on the computer running the server. To let remote users follow a link, deploy behind HTTPS with the correct `APP_URL` and a persistent database volume; this repository does not provision hosting.
+Localhost links work only on the computer running the server. To let remote users follow a link, deploy behind HTTPS with the correct `APP_URL` and a persistent database volume; see the free hosting instructions below.
+
+## Free hosting with alwaysdata
+
+The app can run on a single Node.js service with persistent local storage; it does not require a database migration. [alwaysdata's free personal plan](https://www.alwaysdata.com/en/offers/) currently lists 1 GB disk and 256 MB RAM. Confirm eligibility and the current limits before creating the account. [Node.js hosting documentation](https://help.alwaysdata.com/en/docs/web-hosting/languages/nodejs/configuration/).
+
+1. Create a free hosting account and select Node.js 24 under **Environment → Node.js**. Confirm its exact version is at least 24.13 before starting the app.
+2. Place a fresh checkout in a dedicated application directory on the host. Use the branch/commit containing the latest features. Install the locked dependencies there with lifecycle scripts disabled (`npm ci --omit=dev --ignore-scripts`) before configuring secrets. Do not upload your local `.env`, database, or `node_modules`.
+3. Under **Web → Sites**, add a **Node.js** site. Set its working directory to the checkout and its command to `npm run start:production` (equivalently, `node /home/ACCOUNT/ScopeShield/src/server.js`). Replace `ACCOUNT` with your hosting account name.
+4. Configure runtime environment variables in the hosting dashboard: `NODE_ENV=production`, `APP_URL=https://YOUR-ACCOUNT.alwaysdata.net`, `GROQ_API_KEY`, `GROQ_MODEL`, `PAYPAL_CLIENT_ID`, and `PAYPAL_CLIENT_SECRET`. Enter secret values directly in the dashboard; do not put them in the repository, startup command, or screenshots. Use sandbox PayPal credentials only.
+5. The provider supplies its listening `HOST` (or `IP`) and `PORT`. Use the exact assigned values; do not copy the local `.env` port. Production respects those bindings; development always stays on `127.0.0.1`. `APP_URL` is the public HTTPS origin, separate from the internal listening address.
+6. Enable HTTPS and redirect HTTP to HTTPS using the hosting dashboard. Serve the app through the Node.js site, not a static file site pointed at the repository.
+7. Keep the checkout's `data/` directory on persistent hosting storage. This is where the app creates its private SQLite database. Reuse that directory on updates; do not replace or delete it during deployment. Back it up privately. Start with new synthetic demo accounts and proposals on the host.
+8. Verify signup/login, a real Groq comparison, publication, the client link, and complete sandbox checkout. Restart the hosted process, sign in again, and confirm the same proposal link and payment record still work. Only then add the public HTTPS URL to Devpost.
+
+Keep one application process. Login sessions reset on restart; accounts and published proposals persist in SQLite. Rate limits use the backend connection IP; on shared reverse-proxy hosting, visitors may share those limits. Do not weaken host/origin checks or enable arbitrary proxy trust to work around a deployment error.
+
+This is deployment preparation, not a verified hosted demo. Account creation, dependency verification, publication, provider setup, and hosted end-to-end testing are still required.
 
 ## Client change order and cost summary
 
@@ -216,7 +233,7 @@ Automated Groq/PayPal responses are mocked. The verification table above disting
 
 ## Prototype limits
 
-Multiple freelancer accounts on one server process, USD only, pasted text, fixed published proposals, and sandbox payments. All accounts use the same configured sandbox merchant; accounts do not connect independent PayPal sellers. No email verification, password recovery, teams, email delivery, file extraction, automatic pricing, real-money mode, background webhooks, refunds/disputes, or multiple server replicas. Payment state is refreshed on demand. Use unique demo credentials; public production use needs email verification/recovery and merchant onboarding. Deployment is not provisioned.
+Multiple freelancer accounts on one server process, USD only, pasted text, fixed published proposals, and sandbox payments. All accounts use the same configured sandbox merchant; accounts do not connect independent PayPal sellers. No email verification, password recovery, teams, email delivery, file extraction, automatic pricing, real-money mode, background webhooks, refunds/disputes, or multiple server replicas. Payment state is refreshed on demand. Use unique demo credentials; public production use needs email verification/recovery and merchant onboarding. Hosting setup is documented above; no deployment is provisioned by the repository.
 
 ## Source map and license
 

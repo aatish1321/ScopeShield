@@ -173,7 +173,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     process.umask(0o077);
     const config = loadConfig();
     const store = openStore();
-    const server = createApp(config, { store }).listen(config.port, '127.0.0.1', () => {
+    const server = createApp(config, { store }).listen(config.port, config.listenHost, () => {
       console.log(`ScopeShield running at ${config.appUrl.origin}`);
     }).on('error', () => {
       store.close();

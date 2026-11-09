@@ -1,3 +1,5 @@
+import { isIP } from 'node:net';
+
 export class AppError extends Error {
   constructor(status, message) {
     super(message);
@@ -36,7 +38,7 @@ export function validateProposal(body) {
 }
 
 export function loadConfig(env = process.env) {
-  if (!env.GROQ_API_KEY?.trim()) throw new Error('Set GROQ_API_KEY in your local .env.');
+  if (!env.GROQ_API_KEY?.trim()) throw new Error('Set GROQ_API_KEY in the environment or your local .env.');
   let appUrl;
   try {
     appUrl = new URL(env.APP_URL || 'http://localhost:3000');
@@ -51,12 +53,15 @@ export function loadConfig(env = process.env) {
   }
   const port = Number(env.PORT || appUrl.port || 3000);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT must be 1–65535.');
+  const listenHost = env.NODE_ENV === 'production' ? (env.HOST?.trim() || env.IP?.trim() || '127.0.0.1') : '127.0.0.1';
+  if (!isIP(listenHost)) throw new Error('HOST must be a valid IP address assigned by your hosting provider.');
   const paypalClientId = env.PAYPAL_CLIENT_ID?.trim() || '';
   const paypalSecret = env.PAYPAL_CLIENT_SECRET?.trim() || '';
   if (Boolean(paypalClientId) !== Boolean(paypalSecret)) throw new Error('Set both PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET, or leave both blank to disable checkout.');
   return {
     appUrl,
     port,
+    listenHost,
     groqKey: env.GROQ_API_KEY.trim(),
     groqModel: env.GROQ_MODEL?.trim() || 'openai/gpt-oss-20b',
     paypalClientId,
