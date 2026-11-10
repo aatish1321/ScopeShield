@@ -44,7 +44,7 @@ export function createApp(config, { fetchApi = fetch, now = Date.now, store = op
     }
     next();
   });
-  app.use(express.json({ limit: '64kb', strict: true }));
+  app.use(express.json({ limit: '64kb', strict: true, inflate: false }));
 
   const sessionKey = req => {
     const token = req.headers.cookie?.split(';').map(value => value.trim())
@@ -159,9 +159,10 @@ export function createApp(config, { fetchApi = fetch, now = Date.now, store = op
   app.use((error, req, res, next) => {
     if (res.headersSent) return next(error);
     const status = error instanceof AppError ? error.status :
-      error.type === 'entity.too.large' ? 413 : error.type === 'entity.parse.failed' ? 400 : 500;
+      error.type === 'entity.too.large' ? 413 : error.type === 'encoding.unsupported' ? 415 : error.type === 'entity.parse.failed' ? 400 : 500;
     const message = error instanceof AppError ? error.message :
       status === 413 ? 'Request is too large. Shorten the agreement or request.' :
+      status === 415 ? 'Compressed request bodies are not supported.' :
       status === 400 ? 'Invalid JSON request.' : 'Unexpected server error. Please try again.';
     res.status(status).json({ error: message });
   });

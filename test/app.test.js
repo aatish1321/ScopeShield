@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
+import { gzipSync } from 'node:zlib';
 import { readFile } from 'node:fs/promises';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -50,6 +51,19 @@ async function start(t, options = {}) {
   };
   return { request, login, base, config, store };
 }
+
+test('compressed JSON with trailing bytes is rejected without crashing the server', async t => {
+  const { base, config, request } = await start(t);
+  const body = Buffer.concat([gzipSync(JSON.stringify(account)), Buffer.from('trailing invalid bytes')]);
+  const response = await fetch(base + '/api/login', {
+    method: 'POST',
+    headers: { Origin: config.appUrl.origin, 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' },
+    body,
+  });
+  assert.equal(response.status, 415);
+  assert.deepEqual(await response.json(), { error: 'Compressed request bodies are not supported.' });
+  assert.equal((await request('/api/session')).status, 401);
+});
 
 test('anonymous APIs fail closed; valid login grants analysis; logout revokes session', async t => {
   const { request, login } = await start(t);

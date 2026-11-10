@@ -27,7 +27,7 @@ AI does not set binding prices, promise delivery dates, send messages, or charge
 
 | Check | Evidence |
 | --- | --- |
-| Automated behavior and security checks | Previous full run: 56 passing tests. Latest complete non-HTTP run: 50 checks passed inside a disposable, network-isolated Bubblewrap runtime; subsequent UI changes passed their targeted checks. HTTP tests still await dependency verification. Payment tests use mocked PayPal responses |
+| Automated behavior and security checks | Latest full run: 70 checks passed inside a disposable, network-isolated Bubblewrap runtime using reviewed, integrity-checked release artifacts, including HTTP tests and compressed-request crash protection. Payment tests use mocked PayPal responses |
 | Real Groq access | Synthetic additional, included, and unclear cases exercised successfully, including the multiline website/store example |
 | Persistence | A published synthetic proposal and its original client link survived an actual application restart |
 | Real PayPal sandbox access | OAuth, order creation, and order retrieval passed; stored USD amount, reference, merchant, and approval destination verified |
@@ -135,7 +135,7 @@ The app can run on a single Node.js service with persistent local storage; it do
 
 Keep one application process. Login sessions reset on restart; accounts and published proposals persist in SQLite. Rate limits use the backend connection IP; on shared reverse-proxy hosting, visitors may share those limits. Do not weaken host/origin checks or enable arbitrary proxy trust to work around a deployment error.
 
-This is deployment preparation, not a verified hosted demo. Account creation, dependency verification, publication, provider setup, and hosted end-to-end testing are still required.
+This is deployment preparation, not a verified hosted demo. Account configuration, publication, provider setup, and hosted end-to-end testing are still required.
 
 ## Client change order and cost summary
 
@@ -217,6 +217,8 @@ npm test
 The checks cover authentication, session expiry/logout, CSRF/origin checks, private-file isolation, safe text rendering, input/evidence validation, exact money parsing, immutable terms, restart persistence, client/workspace and cross-account isolation, acceptance, payment idempotency, concurrent requests, timeouts, pending/failed/completed states, amount/currency/reference/merchant mismatches, and owner-only deletion with retained records, deactivated links and payment-race protection.
 
 Automated Groq/PayPal responses are mocked. The verification table above distinguishes these tests from actual external API checks.
+
+The lockfile pins `body-parser` 2.4.0, fixing [GHSA-27r3-jxmh-p828](https://github.com/advisories/GHSA-27r3-jxmh-p828). Compressed JSON requests are rejected with HTTP 415 because the interface sends ordinary JSON. On November 10, 2026, the 65 exact dependency release artifacts matched their SHA-512 lockfile digests and npm registry ECDSA signatures; upstream release identity was cross-checked, and an OSV version scan returned no known advisories for this set. An offline `npm ci --omit=dev --ignore-scripts` restore also succeeded. These checks are point-in-time evidence, not a guarantee that dependencies are free of vulnerabilities.
 
 | Symptom | What to check |
 | --- | --- |
