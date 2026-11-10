@@ -1,0 +1,47 @@
+:root{font-size:16px}
+body.glass-theme{--teal:#173bd1;--navy:#111325;--muted:#51566d;--line:#d9dbea;--surface:#fafaf8;--text:#111325;--secondary:#3f4b61;--quiet:#4f5d73;--accent:#173bd1;--action:#173bd1;--input-border:#858ba2;--input-surface:#ffffff;font-family:"Google Sans",Arial,sans-serif;color:var(--text);background:#f7f7f3;line-height:1.65;color-scheme:light;isolation:isolate}
+body.glass-theme:before{content:"";position:fixed;inset:-20vh -15vw;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 20% 20%,#cdd6fb33,transparent 45%),radial-gradient(ellipse at 80% 70%,#d8ddf833,transparent 45%);animation:ambient-gradient 30s ease-in-out infinite alternate}
+body.glass-theme:after{content:"";position:fixed;inset:-8vh -12vw;z-index:-1;pointer-events:none;background:url('/assets/forest-waves.svg') center / cover no-repeat;opacity:.2;animation:forest-waves 20s ease-in-out infinite alternate}
+@keyframes ambient-gradient{from{transform:translate3d(-2%,-1%,0)}to{transform:translate3d(3%,3%,0)}}
+@keyframes forest-waves{from{transform:translate3d(-4%,2%,0) scale(1.05)}to{transform:translate3d(5%,-2%,0) scale(1.08)}}
+.glass-theme h1,.glass-theme h2,.glass-theme h3,.glass-theme strong{color:var(--text)}
+.glass-theme h1,.glass-theme h2,.glass-theme h3,.glass-theme .brand{font-family:"Google Sans",Arial,sans-serif}
+.glass-theme p,.glass-theme small,.glass-theme .notice{color:var(--secondary)}
+.glass-theme small,.glass-theme .notice{font-size:1rem}
+.glass-theme a{color:var(--accent)}
+.glass-theme .brand{color:var(--text);letter-spacing:-.045em}
+.glass-theme .brand-dot{color:var(--accent)}
+.glass-theme .brand-logo{background:#fff;border-radius:50%}
+.glass-theme .topbar,.glass-theme .site-header{position:relative;max-width:1240px;width:calc(100% - 48px);min-height:76px;margin:24px auto;padding:12px 24px;border:1px solid #dddfea;border-radius:999px;background:#ffffffc9;box-shadow:0 5px 25px #20285406;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.glass-theme nav a,.glass-theme .account>a:not(.button){color:#30354c}
+.glass-theme .button,.glass-theme button{background:var(--action);border:1px solid var(--action);color:white;border-radius:8px;box-shadow:none;font-weight:600}
+.glass-theme .button:hover,.glass-theme button:hover{background:#102b9e;border-color:#102b9e;color:#fff}
+.glass-theme button:disabled{opacity:.65;cursor:wait}
+.glass-theme .secondary,.glass-theme #example,.glass-theme #refresh-proposals,.glass-theme #check-status{background:#fff;color:#30354c;border:1px solid #c8cce0}
+.glass-theme .secondary:hover,.glass-theme #example:hover,.glass-theme #refresh-proposals:hover,.glass-theme #check-status:hover{background:#edf0fe;color:#111325}
+.glass-theme label{color:#262b42;font-size:1rem;font-weight:600}
+.glass-theme input,.glass-theme textarea{color:var(--text);background:var(--input-surface);border:1px solid var(--input-border);border-radius:8px;caret-color:var(--accent)}
+.glass-theme input::placeholder,.glass-theme textarea::placeholder{color:var(--quiet);opacity:1}
+.glass-theme input:focus,.glass-theme textarea:focus{border-color:#173bd1;outline:3px solid #173bd11f}
+.glass-theme .check{background:#f0f2fc;border-color:#c8cfe6;color:#30354c}
+.glass-theme .check input{accent-color:#173bd1}
+.glass-theme .auth-card,.glass-theme .client-main section{background:#ffffffed;border:1px solid #d8dce9;border-radius:16px;box-shadow:0 12px 40px #161d3d08;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.glass-theme .auth-card>.notice{font-size:1rem!important}
+.glass-theme .auth-steps span{color:var(--accent)}
+.glass-theme .badge{background:#eaf0ff;color:#1939a8;border-color:#cad5fb;font-size:1rem}
+.glass-theme .badge.warning{background:#fff6e4;color:#855d13;border-color:#e9d29d}
+.glass-theme .eyebrow{color:#565d79;font-size:1rem}
+.glass-theme #status:not(:empty){background:#edf1ff;border-left-color:#173bd1;color:#223a82}
+.glass-theme .sandbox-note{background:#f0f2fc;border-color:#d5dbed;color:#4a5678}
+.glass-theme footer{background:transparent;border-color:#d9dbea;color:#51566d}
+.glass-theme .insight{background:#fff6e6;border-left-color:#d5ad54;color:#6d551f}
+.glass-theme .item{background:#fff;border-color:#d8dce9}
+.glass-theme blockquote{background:#f2f4fc;border-color:#778bdd;color:#303a61}
+.glass-theme #items .item blockquote:nth-of-type(1){background:#fff8e9;border-color:#d3ad61}
+.glass-theme .payment-summary{background:#edf1ff;border-color:#cbd5f3}
+.glass-theme .payment-summary #amount,.glass-theme .payment-summary #delivery{color:#111325}
+.glass-theme #receipt{background:#eaf5ed;color:#285737;border:1px solid #b9d8c0}
+.glass-theme :focus-visible{outline:3px solid #3157eb;outline-offset:4px}
+@media(max-width:620px){.glass-theme .topbar,.glass-theme .site-header{width:calc(100% - 24px);padding:10px 16px;margin:12px auto 20px;min-height:64px;border-radius:30px;gap:12px}.glass-theme .auth-layout{min-height:0}}
+@media(prefers-reduced-motion:reduce){body.glass-theme:before,body.glass-theme:after{animation:none;transform:none}.glass-theme{scroll-behavior:auto}}
+@media(prefers-reduced-transparency:reduce){.glass-theme .widget,.glass-theme .auth-card,.glass-theme .client-main section,.glass-theme .interface-preview,.glass-theme .preview-content,.glass-theme .product-capture,.glass-theme .final-cta{background:#fafaf8!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}

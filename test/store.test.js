@@ -32,7 +32,7 @@ test('public views expose only approved terms and payment status', () => {
   try {
     const row = store.create({ title: '<script>test</script>', work: 'Store', delivery: 'Five days', amountCents: 1 });
     const value = publicProposal({ ...row, agreement: 'private agreement', raw_request: 'private request', owner_key: 'secret' });
-    assert.deepEqual(Object.keys(value).sort(), ['title', 'work', 'delivery', 'amountCents', 'currency', 'createdAt', 'status', 'captureId', 'paidAt'].sort());
+    assert.deepEqual(Object.keys(value).sort(), ['title', 'work', 'delivery', 'amountCents', 'currency', 'createdAt', 'status', 'captureId', 'paidAt', 'originalScope', 'changeReason', 'originalAmountCents'].sort());
     assert.equal(value.amountCents, 1);
     assert.equal(value.currency, 'USD');
     assert.equal(value.status, 'unpaid');
@@ -85,4 +85,41 @@ test('accounts and ownership persist; only explicit local assignment links legac
   assert.equal(second.list().length, 0);
   assert.equal(second.get(legacy.token).amount_cents, 100);
   second.close();
+});
+
+test('reviewed change context persists, cannot be edited, and older proposals migrate without invented terms', t => {
+  const directory = mkdtempSync(join(tmpdir(), 'scopeshield-change-order-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const path = join(directory, 'proposals.sqlite');
+  const first = openStore(path);
+  const old = first.create({ title: 'Legacy', work: 'Extra work', delivery: 'Five days', amountCents: 25000 });
+  first.updatePayment(old.token, { order_id: 'ORDER12345678', payment_status: 'ready' });
+  first.close();
+  const legacyDb = new DatabaseSync(path);
+  legacyDb.exec(`DROP TRIGGER fixed_change_context;
+    ALTER TABLE proposals DROP COLUMN original_scope;
+    ALTER TABLE proposals DROP COLUMN change_reason;
+    ALTER TABLE proposals DROP COLUMN original_amount_cents;`);
+  legacyDb.close();
+  const migrated = openStore(path);
+  const preserved = migrated.get(old.token);
+  assert.equal(preserved.original_scope, '');
+  assert.equal(preserved.change_reason, '');
+  assert.equal(preserved.original_amount_cents, null);
+  assert.equal(preserved.amount_cents, 25000);
+  assert.equal(preserved.order_id, 'ORDER12345678');
+  assert.equal(preserved.payment_status, 'ready');
+  const row = migrated.create({ title: 'Store', work: 'Ten products', delivery: 'Five days', amountCents: 25000,
+    originalScope: 'Three pages', changeReason: 'Adds product data, checkout and testing.', originalAmountCents: 60000 });
+  assert.throws(() => migrated.updatePayment(row.token, { original_scope: 'Altered' }), /Invalid payment update/);
+  migrated.close();
+  const reopened = openStore(path);
+  assert.equal(publicProposal(reopened.get(row.token)).originalScope, 'Three pages');
+  assert.equal(publicProposal(reopened.get(row.token)).originalAmountCents, 60000);
+  reopened.close();
+  const db = new DatabaseSync(path);
+  for (const [column, value] of [['original_scope', 'Altered'], ['change_reason', 'Changed'], ['original_amount_cents', 1]]) {
+    assert.throws(() => db.prepare(`UPDATE proposals SET ${column} = ? WHERE token = ?`).run(value, row.token), /cannot be changed/);
+  }
+  db.close();
 });

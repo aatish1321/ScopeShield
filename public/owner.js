@@ -1,3 +1,5 @@
+import { dashboardMetrics } from './dashboard.js';
+
 const $ = id => document.getElementById(id);
 let signedIn = false;
 let analysisController;
@@ -69,6 +71,9 @@ function renderComparison(result) {
   $('draft').hidden = false;
   $('work').value = result.classification === 'additional' ? result.items.map(item => item.suggestedWork).join('\n\n') : '';
   $('title').value = result.classification === 'additional' ? 'Additional work proposal' : '';
+  $('original-scope').value = [...new Set(result.items.map(item => item.agreementExcerpt).filter(Boolean))].join('\n\n').slice(0, 4000);
+  $('change-reason').value = result.classification === 'additional' ? result.items.map(item => item.explanation).join('\n\n').slice(0, 4000) : '';
+  $('reviewed').checked = false;
   $('review-warning').textContent = result.classification === 'additional'
     ? 'Review the suggested work, then set your own price and delivery change. Nothing is sent or charged.'
     : 'The AI has not established additional work. Clarify the request with your client before proposing any charge.';
@@ -138,25 +143,110 @@ $('analysis-form').addEventListener('submit', async event => {
 
 const usd = cents => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
 
+function renderDashboard(proposals) {
+  const metrics = dashboardMetrics(proposals);
+  $('total-count').textContent = String(metrics.total);
+  $('nav-proposal-count').textContent = String(metrics.total);
+  $('paid-count').textContent = String(metrics.groups.paid);
+  $('paid-total').textContent = usd(metrics.paidCents);
+  $('open-total').textContent = usd(metrics.openCents);
+  $('open-count').textContent = `${metrics.groups.awaiting} awaiting payment · ${metrics.groups.processing} processing or unconfirmed`;
+  $('paid-rate').textContent = `${metrics.paidRate}%`;
+  $('week-total').textContent = String(metrics.activity.reduce((sum, value) => sum + value.count, 0));
+  $('month-total').textContent = usd(metrics.collections.at(-1));
+  $('activity-chart').replaceChildren();
+  const max = Math.max(1, ...metrics.activity.map(value => value.count));
+  for (const value of metrics.activity) {
+    const column = document.createElement('div');
+    column.className = 'chart-column';
+    const track = document.createElement('div');
+    track.className = 'bar-track';
+    const bar = document.createElement('div');
+    bar.className = 'activity-bar';
+    // SVG geometry avoids inline styles under the application's strict CSP.
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 100');
+    svg.setAttribute('preserveAspectRatio', 'none');
+    const rect = document.createElementNS(svg.namespaceURI, 'rect');
+    const height = value.count / max * 100;
+    for (const [name, number] of Object.entries({ x: 0, y: 100 - height, width: 24, height, rx: 5 })) rect.setAttribute(name, String(number));
+    svg.append(rect);
+    bar.append(svg);
+    track.append(bar);
+    addText(column, 'small', String(value.count));
+    column.append(track);
+    addText(column, 'span', new Date(`${value.date}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' }));
+    $('activity-chart').append(column);
+  }
+  $('activity-chart').setAttribute('aria-label', metrics.activity.map(value => `${value.date}: ${value.count} proposals`).join('; '));
+  const ceiling = Math.max(1, ...metrics.collections);
+  const points = metrics.collections.map((cents, index) => `${index * 400 / 29},${140 - cents / ceiling * 120}`);
+  $('collection-line').setAttribute('d', `M${points.join(' L')}`);
+  $('collection-area').setAttribute('d', `M0,150 L${points.join(' L')} L400,150 Z`);
+  $('collection-chart').setAttribute('aria-label', `Cumulative confirmed sandbox payments over the last 30 UTC days: ${usd(metrics.collections.at(-1))}.`);
+  $('pipeline').replaceChildren();
+  for (const [group, label] of Object.entries({ paid: 'Paid', awaiting: 'Awaiting payment', processing: 'Processing / unconfirmed', failed: 'Failed / unavailable' })) {
+    const row = document.createElement('div');
+    row.className = `pipeline-row pipeline-${group}`;
+    addText(row, 'span', label);
+    addText(row, 'strong', String(metrics.groups[group]));
+    const meter = document.createElement('meter');
+    meter.min = 0;
+    meter.max = Math.max(1, metrics.total);
+    meter.value = metrics.groups[group];
+    meter.setAttribute('aria-label', `${label}: ${metrics.groups[group]} of ${metrics.total}`);
+    row.append(meter);
+    $('pipeline').append(row);
+  }
+  $('overview').setAttribute('aria-busy', 'false');
+}
+
 async function refreshProposals() {
   const proposals = await api('/api/proposals');
   if (!signedIn) return;
-  $('total-count').textContent = String(proposals.length);
-  $('paid-count').textContent = String(proposals.filter(p => p.status === 'paid').length);
-  $('paid-total').textContent = usd(proposals.filter(p => p.status === 'paid').reduce((total, p) => total + p.amountCents, 0));
+  renderDashboard(proposals);
   $('proposals').replaceChildren();
-  if (!proposals.length) addText($('proposals'), 'p', 'No published proposals yet.');
+  if (!proposals.length) {
+    const empty = document.createElement('div');
+    empty.className = 'dashboard-empty';
+    const mark = document.createElement('span');
+    mark.className = 'empty-document';
+    mark.setAttribute('aria-hidden', 'true');
+    mark.textContent = '↗';
+    empty.append(mark);
+    addText(empty, 'h3', 'Your next agreement starts here.');
+    addText(empty, 'p', 'Compare a client request, review the terms, and publish your first proposal.');
+    const start = document.createElement('a');
+    start.href = '#analysis-section';
+    start.textContent = 'Create your first proposal →';
+    empty.append(start);
+    $('proposals').append(empty);
+  }
   for (const proposal of proposals) {
     const card = document.createElement('article');
     card.className = 'item proposal-row';
+    const cover = document.createElement('div');
+    cover.className = 'proposal-cover';
+    addText(cover, 'small', 'CHANGE ORDER');
+    addText(cover, 'strong', `${usd(proposal.amountCents)} USD`);
+    addText(cover, 'span', new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(proposal.createdAt)));
+    card.append(cover);
     addText(card, 'h3', proposal.title);
-    addText(card, 'p', `${usd(proposal.amountCents)} USD · ${proposal.status}`);
+    addText(card, 'p', proposal.work.length > 120 ? `${proposal.work.slice(0, 120)}…` : proposal.work);
+    const meta = document.createElement('div');
+    meta.className = 'proposal-meta';
+    const state = document.createElement('span');
+    state.className = `proposal-state ${proposal.status === 'paid' ? 'is-paid' : 'is-open'}`;
+    state.textContent = proposal.status;
+    meta.append(state);
+    card.append(meta);
     if (proposal.captureId) addText(card, 'p', `PayPal transaction: ${proposal.captureId}`);
     const link = document.createElement('a');
     link.href = `/p/${proposal.token}`;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
-    link.textContent = new URL(link.href).href;
+    link.textContent = 'Open change order ↗';
+    link.setAttribute('aria-label', `Open change order: ${proposal.title}`);
     card.append(link);
     const copy = document.createElement('button');
     copy.type = 'button';
@@ -166,7 +256,7 @@ async function refreshProposals() {
         await navigator.clipboard.writeText(link.href);
         $('status').textContent = 'Client link copied. Anyone with this link can view the proposal.';
       } catch {
-        $('status').textContent = 'Could not copy automatically. Copy the displayed link manually.';
+        $('status').textContent = 'Automatic copy is unavailable. Right-click “Open change order” and copy its link.';
       }
     });
     card.append(document.createElement('br'), copy);
@@ -208,7 +298,9 @@ async function refreshProposals() {
 }
 
 $('refresh-proposals').addEventListener('click', () => {
-  refreshProposals().catch(error => { $('status').textContent = error.message; });
+  $('refresh-proposals').disabled = true;
+  refreshProposals().catch(error => { $('status').textContent = error.message; })
+    .finally(() => { $('refresh-proposals').disabled = false; });
 });
 
 $('draft-form').addEventListener('submit', async event => {
@@ -218,6 +310,9 @@ $('draft-form').addEventListener('submit', async event => {
     const proposal = await api('/api/proposals', {
       title: $('title').value,
       work: $('work').value,
+      originalScope: $('original-scope').value,
+      changeReason: $('change-reason').value,
+      originalAmount: $('original-amount').value,
       amount: $('amount').value,
       delivery: $('delivery').value,
       reviewed: $('reviewed').checked,
@@ -235,6 +330,6 @@ $('draft-form').addEventListener('submit', async event => {
   }
 });
 
-api('/api/session').then(result => { $('account-name').textContent = result.user.name; setSignedIn(true); }).catch(error => {
+api('/api/session').then(result => { $('account-name').textContent = result.user.name; $('workspace-greeting').textContent = `Welcome back, ${result.user.name}.`; setSignedIn(true); }).catch(error => {
   $('status').textContent = error.message;
 });

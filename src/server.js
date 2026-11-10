@@ -30,7 +30,7 @@ export function createApp(config, { fetchApi = fetch, now = Date.now, store = op
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'DENY',
       'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-      'Content-Security-Policy': "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
+      'Content-Security-Policy': "default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
     });
     if (secure) res.set('Strict-Transport-Security', 'max-age=31536000');
     // Only the configured host is served, including on loopback, to resist DNS rebinding.
@@ -44,7 +44,7 @@ export function createApp(config, { fetchApi = fetch, now = Date.now, store = op
     }
     next();
   });
-  app.use(express.json({ limit: '64kb', strict: true }));
+  app.use(express.json({ limit: '64kb', strict: true, inflate: false }));
 
   const sessionKey = req => {
     const token = req.headers.cookie?.split(';').map(value => value.trim())
@@ -159,9 +159,10 @@ export function createApp(config, { fetchApi = fetch, now = Date.now, store = op
   app.use((error, req, res, next) => {
     if (res.headersSent) return next(error);
     const status = error instanceof AppError ? error.status :
-      error.type === 'entity.too.large' ? 413 : error.type === 'entity.parse.failed' ? 400 : 500;
+      error.type === 'entity.too.large' ? 413 : error.type === 'encoding.unsupported' ? 415 : error.type === 'entity.parse.failed' ? 400 : 500;
     const message = error instanceof AppError ? error.message :
       status === 413 ? 'Request is too large. Shorten the agreement or request.' :
+      status === 415 ? 'Compressed request bodies are not supported.' :
       status === 400 ? 'Invalid JSON request.' : 'Unexpected server error. Please try again.';
     res.status(status).json({ error: message });
   });
@@ -173,7 +174,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     process.umask(0o077);
     const config = loadConfig();
     const store = openStore();
-    const server = createApp(config, { store }).listen(config.port, '127.0.0.1', () => {
+    const server = createApp(config, { store }).listen(config.port, config.listenHost, () => {
       console.log(`ScopeShield running at ${config.appUrl.origin}`);
     }).on('error', () => {
       store.close();

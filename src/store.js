@@ -10,6 +10,8 @@ export const validToken = token => typeof token === 'string' && /^[a-f0-9]{64}$/
 export function publicProposal(row) {
   return {
     title: row.title, work: row.work, delivery: row.delivery,
+    originalScope: row.original_scope, changeReason: row.change_reason,
+    originalAmountCents: row.original_amount_cents,
     amountCents: row.amount_cents, currency: row.currency,
     createdAt: row.created_at, status: row.payment_status,
     captureId: row.capture_id, paidAt: row.paid_at,
@@ -69,6 +71,15 @@ export function openStore(path = defaultPath) {
   if (!db.prepare('PRAGMA table_info(proposals)').all().some(column => column.name === 'owner_id')) {
     db.exec('ALTER TABLE proposals ADD COLUMN owner_id TEXT REFERENCES users(id)');
   }
+  const columns = new Set(db.prepare('PRAGMA table_info(proposals)').all().map(column => column.name));
+  for (const [name, definition] of Object.entries({
+    original_scope: "TEXT NOT NULL DEFAULT ''",
+    change_reason: "TEXT NOT NULL DEFAULT ''",
+    original_amount_cents: 'INTEGER CHECK(original_amount_cents BETWEEN 1 AND 99999999)',
+  })) if (!columns.has(name)) db.exec(`ALTER TABLE proposals ADD COLUMN ${name} ${definition}`);
+  db.exec(`CREATE TRIGGER IF NOT EXISTS fixed_change_context
+    BEFORE UPDATE OF original_scope, change_reason, original_amount_cents ON proposals
+    BEGIN SELECT RAISE(ABORT, 'Published terms cannot be changed'); END;`);
   db.exec(`CREATE INDEX IF NOT EXISTS proposals_owner ON proposals(owner_id);
     CREATE TRIGGER IF NOT EXISTS fixed_proposal_owner BEFORE UPDATE OF owner_id ON proposals
     WHEN OLD.owner_id IS NOT NULL BEGIN SELECT RAISE(ABORT, 'Proposal owner cannot be changed'); END;`);
@@ -76,10 +87,10 @@ export function openStore(path = defaultPath) {
     'create_started_at', 'capture_request_id', 'capture_started_at', 'capture_id', 'paid_at', 'merchant_id']);
   const get = db.prepare('SELECT * FROM proposals WHERE token = ? AND deleted_at IS NULL');
   return {
-    create({ title, work, delivery, amountCents }, ownerId = null) {
+    create({ title, work, delivery, amountCents, originalScope = '', changeReason = '', originalAmountCents = null }, ownerId = null) {
       const token = randomBytes(32).toString('hex');
-      db.prepare('INSERT INTO proposals (id, token, title, work, delivery, amount_cents, created_at, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-        .run(randomUUID(), token, title, work, delivery, amountCents, new Date().toISOString(), ownerId);
+      db.prepare('INSERT INTO proposals (id, token, title, work, delivery, amount_cents, created_at, owner_id, original_scope, change_reason, original_amount_cents) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(randomUUID(), token, title, work, delivery, amountCents, new Date().toISOString(), ownerId, originalScope, changeReason, originalAmountCents);
       return get.get(token);
     },
     get(token) { return validToken(token) ? get.get(token) : undefined; },

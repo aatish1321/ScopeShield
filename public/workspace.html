@@ -5,32 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ScopeShield — Workspace</title>
   <link rel="stylesheet" href="/styles.css">
-  <script src="/owner.js" defer></script>
+  <link rel="stylesheet" href="/dashboard.css">
+  <script src="/owner.js" type="module"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&amp;display=swap">
+  <link rel="stylesheet" href="/glass.css">
+  <link rel="stylesheet" href="/receipt.css">
+  <link rel="stylesheet" href="/flows.css">
 </head>
-<body>
-  <header class="topbar">
-    <a class="brand" href="/" aria-label="ScopeShield home"><img class="brand-logo" src="/assets/scopeshield-logo.png" alt="" width="44" height="48"><span>ScopeShield<span class="brand-dot">.</span></span></a>
-    <nav class="workspace-nav" aria-label="Workspace"><a href="#analysis-form">New scope analysis</a><a href="#draft">Proposal editor</a><a href="#published">Published proposals</a></nav>
-    <div class="account"><span class="badge">Sandbox</span><span id="account-name"></span><button id="logout" class="secondary" type="button">Log out</button></div>
-  </header>
+<body class="glass-theme dashboard-page">
+  <div class="app-shell">
+  <aside class="app-sidebar" aria-label="Workspace sidebar">
+    <a class="brand" href="/" aria-label="ScopeShield home"><img class="brand-logo" src="/assets/scopeshield-logo.png" alt="" width="40" height="44"><span>ScopeShield<span class="brand-dot">.</span></span></a>
+    <a class="button sidebar-create" href="#analysis-section">New scope analysis <span aria-hidden="true">＋</span></a>
+    <p class="sidebar-label">WORKSPACE</p>
+    <nav class="workspace-nav" aria-label="Workspace"><a class="active" href="#overview"><span aria-hidden="true">▦</span> Overview</a><a href="#analysis-section"><span aria-hidden="true">✳</span> Scope comparison</a><a href="#published"><span aria-hidden="true">▤</span> Published proposals <span id="nav-proposal-count" class="nav-count">0</span></a></nav>
+    <div class="sidebar-explainer"><span class="sidebar-label">THE WORKFLOW</span><p>Compare the request.<br>Agree on the change.<br>Get paid for the extra.</p><a href="/">How ScopeShield works ↗</a></div>
+    <div class="sidebar-bottom"><span class="badge">PayPal sandbox</span><div class="sidebar-user"><span class="user-mark" aria-hidden="true">S</span><div><span id="account-name"></span><small>Freelancer workspace</small></div></div><button id="logout" class="secondary" type="button">Log out ↗</button></div>
+  </aside>
+  <div class="app-content">
+  <header class="topbar app-topbar"><span>Workspace <span class="breadcrumb-divider">/</span> Overview</span><a href="https://github.com/aatish1321/ScopeShield#demo-walkthrough" target="_blank" rel="noopener noreferrer">Setup & demo guide ↗</a></header>
   <main>
-    <p class="eyebrow">WORKSPACE / SCOPE ANALYSIS</p>
-    <div class="page-heading"><div><h1>Keep your work in scope.</h1><p>Clear agreements. Fair changes. Fewer awkward conversations.</p></div></div>
+
     <p id="status" role="status" aria-live="polite"></p>
-    <p class="sandbox-note">Hackathon sandbox: checkout uses this demo’s configured PayPal merchant. No real funds move.</p>
-    <div id="workspace" hidden>
-      <section class="analysis-section" aria-labelledby="compare-title">
-        <div class="section-heading"><div><p class="eyebrow">01 / UNDERSTAND THE CHANGE</p><h2 id="compare-title">Compare the request</h2></div></div>
+    <div id="workspace" class="workspace-grid" hidden>
+      <div class="workspace-main">
+      <section id="analysis-section" class="analysis-section widget" aria-labelledby="compare-title">
+        <div class="composer-atmosphere" aria-hidden="true"></div>
+    <div class="page-heading"><div><p class="eyebrow">YOUR FREELANCE WORK, AT A GLANCE</p><h1 id="welcome">What changed in your project?</h1><p id="workspace-greeting">Your agreements, change proposals, and payments. One clear workspace.</p></div><a class="button new-analysis" href="#analysis-section">＋ New scope analysis</a></div>
+        <div class="section-heading"><div><p class="eyebrow">START WITH THE AGREEMENT</p><h2 id="compare-title">Compare the agreement.</h2></div></div>
         <p>AI is advisory. Review its reasoning before proposing extra work. Submitted text is sent to Groq; use synthetic examples while testing.</p>
-        <button type="button" id="example">Load website example</button>
         <form id="analysis-form">
           <div class="split"><div class="input-panel"><span class="eyebrow">THE BASELINE</span><label for="agreement">Original agreement</label>
           <textarea id="agreement" rows="6" required maxlength="20000" placeholder="Paste the work and terms originally agreed with your client."></textarea>
           </div><div class="input-panel request-panel"><span class="eyebrow">THE CHANGE</span><label for="request">New client request</label>
           <textarea id="request" rows="6" required maxlength="20000" placeholder="Paste what the client is asking to add or change."></textarea>
-          </div></div><div class="form-actions"><p>Evidence first. You make the final call.</p><button id="analyze" type="submit">Analyze request →</button></div>
+          </div></div><div class="form-actions"><p>AI finds the context.<br>You make the call.</p><div class="composer-controls"><button type="button" id="example">Load example</button><button id="analyze" type="submit">Analyze request ↗</button></div></div>
         </form>
       </section>
+      <div id="overview" class="dashboard-overview" aria-label="Proposal dashboard" aria-busy="true">
+        <div class="metric-grid">
+          <article class="widget metric"><div class="widget-label"><span><span class="widget-icon" aria-hidden="true">▤</span> Published proposals</span><span class="period-label">Current proposals</span></div><strong id="total-count">—</strong><p>Clear terms, ready to share.</p></article>
+          <article class="widget metric"><div class="widget-label"><span><span class="widget-icon" aria-hidden="true">↗</span> Collected in sandbox</span><span class="period-label">Current proposals · USD</span></div><div class="metric-value"><strong id="paid-total">—</strong><span class="lime-tag"><span id="paid-count">—</span> paid</span></div><p>Confirmed by PayPal sandbox.</p></article>
+          <article class="widget metric"><div class="widget-label"><span><span class="widget-icon" aria-hidden="true">◷</span> Awaiting payment</span><span class="period-label">Current proposals · USD</span></div><strong id="open-total">—</strong><p id="open-count">Loading your proposals…</p></article>
+        </div>
+      <section id="published" class="widget" aria-labelledby="published-title">
+        <div class="widget-heading"><div><p class="eyebrow">YOUR WORK, MOVING FORWARD</p><h2 id="published-title">Published proposals</h2></div><button id="refresh-proposals" type="button">↻ Refresh</button></div>
+        <div id="proposals"></div>
+      </section>
+        <div class="dashboard-grid">
+          <section class="widget chart-widget" aria-labelledby="activity-title"><div class="widget-heading"><h2 id="activity-title"><span class="widget-icon" aria-hidden="true">▥</span> Proposal activity</h2><span class="period-label">Last 7 days · UTC</span></div><strong class="chart-total" id="week-total">—</strong><p>Proposals published in the last 7 days</p><div id="activity-chart" class="bar-chart" role="img" aria-label="Proposal activity is loading"></div></section>
+
+
+        </div>
+      </div>
+
       <section id="comparison" aria-labelledby="comparison-title" hidden>
         <p class="eyebrow">AI COMPARISON / REVIEW THE EVIDENCE</p><h2 id="comparison-title">What changed?</h2>
         <p id="classification" class="badge warning"></p>
@@ -41,28 +69,43 @@
         <p class="eyebrow">02 / DEFINE THE EXTRA WORK</p><h2 id="draft-title">Your proposal, your terms.</h2>
         <p id="review-warning">You decide what is extra, what it costs, and when it will be delivered.</p>
         <form id="draft-form">
-          <label for="title">Proposal title</label>
-          <input id="title" maxlength="160" required>
-          <label for="work">Additional work</label>
-          <textarea id="work" rows="5" maxlength="10000" required></textarea>
-          <label for="amount">Price (USD)</label>
-          <input id="amount" type="text" inputmode="decimal" maxlength="12" placeholder="250.00" aria-describedby="amount-help" required>
-          <small id="amount-help">Enter your price in US dollars. No currency conversion.</small>
-          <label for="delivery">Delivery change</label>
-          <textarea id="delivery" rows="2" maxlength="1000" placeholder="For example, three additional working days." required></textarea>
-          <label class="check"><input id="reviewed" type="checkbox" required> I have reviewed the work, price, and delivery change and approve these terms.</label>
-          <p class="notice">Published terms are fixed. Anyone with the client link can view them. Correct mistakes by publishing a new proposal.</p>
-          <button id="publish" type="submit">Approve and publish proposal</button>
+          <div class="share-context-note"><strong>These details will be visible to your client.</strong><p>Share only the relevant original scope and your reviewed explanation. The full agreement and raw AI analysis stay private.</p></div>
+          <div class="editor-title-field"><label for="title">Proposal title</label><input id="title" maxlength="160" required placeholder="Give this change a clear, descriptive title."></div>
+          <div class="editor-grid">
+            <fieldset class="editor-group"><legend>01 / Original agreement</legend>
+              <label for="original-scope">Original scope · client-facing summary</label>
+              <textarea id="original-scope" rows="5" maxlength="4000" required placeholder="For example: A three-page website with Home, About, Contact, a contact form, and one revision round."></textarea>
+              <label for="original-amount">Original agreed fee (USD, optional)</label>
+              <input id="original-amount" type="text" inputmode="decimal" maxlength="12" placeholder="600.00" aria-describedby="original-amount-help">
+              <small id="original-amount-help">Reference only. This checkout charges only the additional work. Enter the original fee yourself; AI does not extract it.</small>
+            </fieldset>
+            <fieldset class="editor-group editor-change-group"><legend>02 / Additional work</legend>
+              <label for="work">What is being added</label><textarea id="work" rows="4" maxlength="10000" required></textarea>
+              <label for="change-reason">Why this requires additional effort</label>
+              <textarea id="change-reason" rows="4" maxlength="4000" required placeholder="Explain the extra implementation, testing, or coordination. Include effort estimates only if you can support them."></textarea>
+              <label for="delivery">Delivery change</label><textarea id="delivery" rows="2" maxlength="1000" placeholder="For example, three additional working days." required></textarea>
+            </fieldset>
+          </div>
+          <div class="editor-fee-card"><div><label for="amount">Additional work fee (USD)</label><small id="amount-help">The amount your client pays for this change. No currency conversion.</small></div><input id="amount" type="text" inputmode="decimal" maxlength="12" placeholder="250.00" aria-describedby="amount-help" required></div>
+          <label class="check"><input id="reviewed" type="checkbox" required> I have reviewed the shared original scope, explanation, work, fees, and delivery change and approve these client-facing terms.</label>
+          <div class="editor-publish-bar"><p class="notice">Published terms are fixed. Anyone with the client link can view them. Correct mistakes by publishing a new proposal.</p><button id="publish" type="submit">Approve and publish proposal ↗</button></div>
         </form>
       </section>
-      <section id="published" aria-labelledby="published-title">
-        <p class="eyebrow">03 / SHARE & FOLLOW THROUGH</p><h2 id="published-title">Published proposals</h2><div class="stats"><div><span>Published</span><strong id="total-count">0</strong></div><div><span>Confirmed paid</span><strong id="paid-count">0</strong></div><div><span>Paid in sandbox</span><strong id="paid-total">$0.00</strong></div></div>
-        <button id="refresh-proposals" type="button">Refresh proposals</button>
-        <div id="proposals"></div>
-      </section>
+      </div>
+      <aside class="workspace-rail" aria-label="Proposal and payment overview">
+          <section class="widget pipeline-widget" aria-labelledby="pipeline-title"><div class="widget-heading"><h2 id="pipeline-title"><span class="widget-icon" aria-hidden="true">◉</span> Your pipeline</h2><a href="#published" aria-label="View published proposals">↗</a></div><div class="pipeline-hero"><strong id="paid-rate">—</strong><span>of published proposals paid</span></div><div id="pipeline" class="pipeline-list"></div><div class="pipeline-note"><span class="live-dot" aria-hidden="true"></span> Saved proposal status<p>Use “Check payment status” for the latest PayPal result.</p></div></section>
+          <section class="widget chart-widget" aria-labelledby="collection-title"><div class="widget-heading"><h2 id="collection-title"><span class="widget-icon" aria-hidden="true">↗</span> Payment collection</h2><span class="period-label">Last 30 days · USD</span></div><strong class="chart-total" id="month-total">—</strong><p>Confirmed sandbox payments</p><svg id="collection-chart" class="collection-chart" viewBox="0 0 400 150" role="img" aria-label="Payment collection is loading" preserveAspectRatio="none"><defs><linearGradient id="collection-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#173bd1" stop-opacity=".22"/><stop offset="100%" stop-color="#173bd1" stop-opacity="0"/></linearGradient></defs><path id="collection-area" fill="url(#collection-fill)"/><path id="collection-line" fill="none" stroke="#17616b" stroke-width="3" vector-effect="non-scaling-stroke"/></svg><div class="chart-range"><span>30 days ago</span><span>Today</span></div></section>
+        <section class="widget workflow-widget"><p class="eyebrow">EVERY CHANGE, IN ORDER</p><h2>A clear next step.</h2><ol><li><strong>Compare</strong><span>Review the agreement and the new request.</span></li><li><strong>Agree</strong><span>Publish your reviewed work, fee, and delivery.</span></li><li><strong>Collect</strong><span>Let your client accept and pay through PayPal sandbox.</span></li></ol><p class="notice">Nothing is published or charged without approval.</p></section>
+        <div class="rail-note"><span class="live-dot" aria-hidden="true"></span> Your workspace stays yours.<p>Only the proposal details you approve are shared through the client link.</p></div>
+      </aside>
+      <div class="workspace-footnotes">
       <p class="notice">Unsaved agreement text, analysis, and draft edits are held in this page’s memory only. Reloading or logging out clears them.</p>
+      <p class="sandbox-note"><span class="live-dot" aria-hidden="true"></span> Sandbox workspace · All payments use this demo’s configured merchant. No real funds move.</p>
+      </div>
     </div>
   </main>
   <footer>ScopeShield · Clear scope. Confident work. <a href="/">Back to home</a></footer>
+  </div>
+  </div>
 </body>
 </html>

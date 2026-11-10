@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" fill="none">
+  <defs>
+    <linearGradient id="pine" x1="200" y1="300" x2="1300" y2="950" gradientUnits="userSpaceOnUse"><stop stop-color="#bbc7f3" stop-opacity=".35"/><stop offset="1" stop-color="#e1e5f7" stop-opacity=".08"/></linearGradient>
+    <linearGradient id="mint" x1="0" y1="450" x2="1600" y2="500" gradientUnits="userSpaceOnUse"><stop stop-color="#8298d6" stop-opacity=".08"/><stop offset=".5" stop-color="#8298d6" stop-opacity=".55"/><stop offset="1" stop-color="#b6c4e9" stop-opacity=".12"/></linearGradient>
+  </defs>
+  <path d="M-160 370C120 110 490 690 860 420S1410 200 1780 350V1100H-160Z" fill="url(#pine)"/>
+  <path d="M-160 370C120 110 490 690 860 420S1410 200 1780 350" stroke="url(#mint)" stroke-width="2"/>
+  <path d="M-160 485C220 160 410 820 850 540S1400 290 1780 480V1100H-160Z" fill="url(#pine)"/>
+  <path d="M-160 485C220 160 410 820 850 540S1400 290 1780 480" stroke="url(#mint)" stroke-width="3"/>
+  <path d="M-160 610C170 390 590 900 930 655S1450 440 1780 600V1100H-160Z" fill="url(#pine)"/>
+  <path d="M-160 610C170 390 590 900 930 655S1450 440 1780 600" stroke="url(#mint)" stroke-width="2"/>
+</svg>

@@ -9,6 +9,18 @@ test('configuration defaults to loopback and Groq strict-output model', () => {
   assert.equal(config.appUrl.origin, 'http://localhost:3000');
   assert.equal(config.groqModel, 'openai/gpt-oss-20b');
   assert.equal(config.port, 3000);
+  assert.equal(config.listenHost, '127.0.0.1');
+});
+
+test('hosted configuration uses the assigned IP while development stays on loopback', () => {
+  const production = { ...env, NODE_ENV: 'production', APP_URL: 'https://example.alwaysdata.net', PORT: '8100' };
+  assert.equal(loadConfig({ ...production, HOST: '127.0.0.2' }).listenHost, '127.0.0.2');
+  assert.equal(loadConfig({ ...production, IP: '::1' }).listenHost, '::1');
+  assert.equal(loadConfig({ ...production, HOST: '127.0.0.2', IP: '127.0.0.3' }).listenHost, '127.0.0.2');
+  assert.equal(loadConfig(production).listenHost, '127.0.0.1');
+  assert.equal(loadConfig(production).port, 8100);
+  assert.equal(loadConfig({ ...env, HOST: '0.0.0.0', IP: '127.0.0.2' }).listenHost, '127.0.0.1');
+  assert.throws(() => loadConfig({ ...production, HOST: 'untrusted.example' }), /HOST/);
 });
 
 test('missing or weak credentials fail closed without echoing values', () => {
@@ -43,9 +55,11 @@ test('USD money parsing is exact and rejects ambiguous or out-of-range amounts',
 });
 
 test('publication requires human review and bounded, explicit terms', () => {
-  const body = { reviewed: true, title: 'Store', work: 'Ten products', delivery: 'Five days', amount: '250.00' };
-  assert.deepEqual(validateProposal(body), { title: 'Store', work: 'Ten products', delivery: 'Five days', amountCents: 25000 });
-  for (const invalid of [{ ...body, reviewed: false }, { ...body, reviewed: 'true' }, { ...body, work: '' }, { ...body, amount: '0' }]) {
+  const body = { originalScope: 'Three-page website', changeReason: 'Adds catalog and checkout implementation and testing.', reviewed: true, title: 'Store', work: 'Ten products', delivery: 'Five days', amount: '250.00' };
+  assert.deepEqual(validateProposal(body), { title: 'Store', work: 'Ten products', delivery: 'Five days', amountCents: 25000, originalScope: body.originalScope, changeReason: body.changeReason, originalAmountCents: null });
+  assert.equal(validateProposal({ ...body, originalAmount: '600.00' }).originalAmountCents, 60000);
+  assert.equal(validateProposal({ ...body, originalAmount: '' }).originalAmountCents, null);
+  for (const invalid of [{ ...body, reviewed: false }, { ...body, reviewed: 'true' }, { ...body, work: '' }, { ...body, amount: '0' }, { ...body, originalScope: '' }, { ...body, changeReason: '' }, { ...body, originalScope: 'x'.repeat(4001) }, { ...body, changeReason: {} }, { ...body, originalAmount: '1e3' }, { ...body, originalAmount: null }]) {
     assert.throws(() => validateProposal(invalid), { status: 400 });
   }
 });

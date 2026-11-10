@@ -2,12 +2,12 @@ const $ = id => document.getElementById(id);
 const signup = window.location.pathname === '/signup';
 if (signup) {
   document.title = 'ScopeShield — Create your workspace';
-  $('auth-title').textContent = 'Make room for better work.';
+  $('auth-title').textContent = 'Create your workspace.';
   $('auth-intro').textContent = 'Create an account to keep your published proposals in one place.';
   $('name-field').hidden = false;
   $('name').required = true;
   $('password').autocomplete = 'new-password';
-  $('submit').textContent = 'Create your workspace →';
+  $('submit').textContent = 'Create account →';
   $('switch-prompt').textContent = 'Already have an account?';
   $('switch-auth').href = '/login';
   $('switch-auth').textContent = 'Log in →';
